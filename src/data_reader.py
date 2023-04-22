@@ -5,8 +5,8 @@ from torch.utils.data import Dataset
 
 
 class ImageDataset(Dataset):
-    def __init__(self, rootdir):
-        self.rootdir = Path(rootdir)
+    def __init__(self, rootdir, trainval="train"):
+        self.rootdir = Path(rootdir) / trainval
         self.img_filenames = sorted(list(self.rootdir.glob("*.jpg")))
 
     def __getitem__(self, idx):
