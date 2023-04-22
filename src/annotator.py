@@ -5,7 +5,9 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPainter, QPen, QColor
 from PyQt5.QtCore import QRectF
+from pathlib import Path
 
+import json
 
 class CustomGraphicsScene(QGraphicsScene):
     def __init__(self, parent=None):
@@ -13,6 +15,7 @@ class CustomGraphicsScene(QGraphicsScene):
         self.point_radius = 3
         self.point_color = QColor(255, 0, 0)  # Red color
         self.pen = QPen(self.point_color)
+        self.points = []
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -24,6 +27,7 @@ class CustomGraphicsScene(QGraphicsScene):
             point_item.setPen(self.pen)
             point_item.setBrush(self.point_color)
             self.addItem(point_item)
+            self.points.append((scene_pos.x(), scene_pos.y()))
             print(f"Clicked point: ({scene_pos.x()}, {scene_pos.y()})")
         super().mousePressEvent(event)
 
@@ -58,8 +62,13 @@ class MainWindow(QMainWindow):
         layout.addWidget(button)
         button.clicked.connect(self.load_image)
 
+        save_button = QPushButton("Save", self)
+        layout.addWidget(save_button)
+        save_button.clicked.connect(self.save_points)
+
     def load_image(self):
         file, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "Images (*.png *.xpm *.jpg)")
+        self.img_filename = Path(file)
 
         if file:
             pixmap = QPixmap(file)
@@ -82,6 +91,15 @@ class MainWindow(QMainWindow):
             self.view.scale(zoom_factor, zoom_factor)
         else:
             self.view.scale(1 / zoom_factor, 1 / zoom_factor)
+
+    def save_points(self):
+        # file, _ = QFileDialog.getSaveFileName(self, "Save Points", "", "JSON Files (*.json)")
+
+        json_path = self.img_filename.with_suffix(".json")
+
+        assert len(self.scene.points) == 12, len(self.scene.points)
+        with open(str(json_path), 'w') as f:
+            json.dump(self.scene.points, f, indent=4)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
