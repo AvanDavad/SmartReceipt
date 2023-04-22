@@ -1,9 +1,31 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QPushButton, QFileDialog, QWidget, QGraphicsView, QGraphicsScene
+from PyQt5.QtWidgets import QGraphicsEllipseItem
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPainter
+from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtGui import QPainter, QPen, QColor
 from PyQt5.QtCore import QRectF
+
+
+class CustomGraphicsScene(QGraphicsScene):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.point_radius = 3
+        self.point_color = QColor(255, 0, 0)  # Red color
+        self.pen = QPen(self.point_color)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            scene_pos = event.scenePos()
+            point_item = QGraphicsEllipseItem(scene_pos.x() - self.point_radius,
+                                              scene_pos.y() - self.point_radius,
+                                              self.point_radius * 2,
+                                              self.point_radius * 2)
+            point_item.setPen(self.pen)
+            point_item.setBrush(self.point_color)
+            self.addItem(point_item)
+            print(f"Clicked point: ({scene_pos.x()}, {scene_pos.y()})")
+        super().mousePressEvent(event)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -24,7 +46,7 @@ class MainWindow(QMainWindow):
         self.view = QGraphicsView(self)
         layout.addWidget(self.view)
 
-        self.scene = QGraphicsScene(self)
+        self.scene = CustomGraphicsScene(self)
         self.view.setScene(self.scene)
         self.view.setRenderHint(QPainter.SmoothPixmapTransform)
         self.view.setRenderHint(QPainter.Antialiasing)
