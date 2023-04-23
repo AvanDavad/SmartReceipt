@@ -6,6 +6,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 import torch
 from PIL import Image
+import numpy as np
 
 class ImageReader:
     def __init__(self, rootdir):
@@ -56,12 +57,37 @@ class ImageDataset(Dataset):
 
         img = s["img"]
         kps = torch.tensor(s["keypoints"])[:6]
+
+        # augment
+        img, kps = self.crop_augment(img, kps)
+
         kps = kps / torch.tensor([img.width, img.height])
         kps = kps.flatten()
 
         img_tensor = self.transforms(img)
 
         return img_tensor, kps
+
+    def crop_augment(self, img, kps):
+        kps_x0 = kps[:,0].min().item()
+        kps_x1 = kps[:,0].max().item()
+        kps_y0 = kps[:,1].min().item()
+        kps_y1 = kps[:,1].max().item()
+
+        crop_x0 = int(kps_x0 * np.random.rand())
+        crop_x1 = int(kps_x1 + np.random.rand() * (img.width - kps_x1))
+        crop_y0 = int(kps_y0 * np.random.rand())
+        crop_y1 = int(kps_y1 + np.random.rand() * (img.height - kps_y1))
+
+        # make square
+        crop_1 = max(crop_x1-crop_x0, crop_y1-crop_y0)
+        crop_y1 = crop_y0 + crop_1
+        crop_x1 = crop_x0 + crop_1
+
+        img = img.crop((crop_x0, crop_y0, crop_x1, crop_y1))
+        kps = kps - torch.tensor([crop_x0, crop_y0])
+
+        return img, kps
 
 if __name__ == "__main__":
     reader = ImageReader("/home/avandavad/projects/receipt_extractor/data/train")
