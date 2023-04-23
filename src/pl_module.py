@@ -77,6 +77,12 @@ class CNNModule(pl.LightningModule):
             text_position = kpt
             draw.text(text_position, text, fill=text_color, font=font)
 
+        for i0, i1, col in [(0,1,"red"), (2,3,"red"), (4,5,"yellow")]:
+            start_point = keypoints[i0]
+            end_point = keypoints[i1]
+            line_width = 5
+            draw.line((start_point, end_point), fill=col, width=line_width)
+
         # Save the image to a file
         img.save(f"inference_{img_path.stem}.jpg")
         return np.array(keypoints).astype(np.float64)
