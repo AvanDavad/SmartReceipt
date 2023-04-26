@@ -97,9 +97,12 @@ class MainWindow(QMainWindow):
 
         json_path = self.img_filename.with_suffix(".json")
 
-        assert len(self.scene.points) == 12, len(self.scene.points)
+        assert len(self.scene.points) == 6, len(self.scene.points)
         with open(str(json_path), 'w') as f:
             json.dump(self.scene.points, f, indent=4)
+
+        print(f"saved {json_path}")
+        sys.exit()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

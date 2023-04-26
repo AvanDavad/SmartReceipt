@@ -41,13 +41,14 @@ class ImageReader:
             plt.scatter(kps[i][0], kps[i][1], c="b", s=10)
 
 class ImageDataset(Dataset):
-    def __init__(self, reader):
+    def __init__(self, reader, augment):
         self.reader = reader
         self.transforms = transforms.Compose([
             transforms.Resize(224),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
+        self.augment = augment
 
     def __len__(self):
         return len(self.reader)
@@ -59,7 +60,8 @@ class ImageDataset(Dataset):
         kps = torch.tensor(s["keypoints"])[:6]
 
         # augment
-        img, kps = self.crop_augment(img, kps)
+        if self.augment:
+            img, kps = self.crop_augment(img, kps)
 
         kps = kps / torch.tensor([img.width, img.height])
         kps = kps.flatten()

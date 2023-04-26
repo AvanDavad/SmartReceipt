@@ -4,13 +4,14 @@ import torchvision.models as models
 import pytorch_lightning as pl
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
+from torchvision.models import ResNet18_Weights
 
 class CNNModule(pl.LightningModule):
     def __init__(self):
         super().__init__()
 
         # Load a pretrained ResNet model (e.g., ResNet-18)
-        self.backbone = models.resnet18(pretrained=True)
+        self.backbone = models.resnet18(weights=ResNet18_Weights.DEFAULT)
 
         # Replace the last fully connected layer to match the desired output size
         num_features = self.backbone.fc.in_features
@@ -18,7 +19,7 @@ class CNNModule(pl.LightningModule):
         self.loss_module = nn.L1Loss()
 
         for param in self.backbone.parameters():
-            param.requires_grad = False
+            param.requires_grad = True
 
         for param in self.backbone.fc.parameters():
             param.requires_grad = True
@@ -27,7 +28,7 @@ class CNNModule(pl.LightningModule):
         return self.backbone(x)
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=5e-4)
+        optimizer = torch.optim.Adam(self.parameters(), lr=2e-4)
         return optimizer
 
     def training_step(self, batch, batch_idx):
