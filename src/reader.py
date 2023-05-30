@@ -37,17 +37,21 @@ class ImageReader:
         s = self[idx]
         plt.imshow(s["img"])
         kps = s["keypoints"]
-        for i in range(12):
+        for i in range(len(kps)):
             plt.scatter(kps[i][0], kps[i][1], c="b", s=10)
+        filename = f"sample_{idx}.jpg"
+        plt.savefig(filename)
+        print(f"saved {filename}")
 
 class ImageDataset(Dataset):
+    transforms = transforms.Compose([
+        transforms.Resize(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+
     def __init__(self, reader, augment):
         self.reader = reader
-        self.transforms = transforms.Compose([
-            transforms.Resize(224),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
         self.augment = augment
 
     def __len__(self):
@@ -61,16 +65,17 @@ class ImageDataset(Dataset):
 
         # augment
         if self.augment:
-            img, kps = self.crop_augment(img, kps)
+            img, kps = ImageDataset.crop_augment(img, kps)
 
         kps = kps / torch.tensor([img.width, img.height])
         kps = kps.flatten()
 
-        img_tensor = self.transforms(img)
+        img_tensor = ImageDataset.transforms(img)
 
         return img_tensor, kps
 
-    def crop_augment(self, img, kps):
+    @staticmethod
+    def crop_augment(img, kps):
         kps_x0 = kps[:,0].min().item()
         kps_x1 = kps[:,0].max().item()
         kps_y0 = kps[:,1].min().item()
@@ -91,7 +96,43 @@ class ImageDataset(Dataset):
 
         return img, kps
 
-if __name__ == "__main__":
-    reader = ImageReader("/home/avandavad/projects/receipt_extractor/data/train")
-    dataset = ImageDataset(reader)
-    inp = dataset[0]
+
+class Top2PointsDataset(Dataset):
+    def __init__(self, reader, augment=False, zoom_in_factor=5.0):
+        self.reader = reader
+        self.augment = augment
+        self.zoom_in_factor = zoom_in_factor
+
+    def __len__(self):
+        return 2*len(self.reader)
+
+    def __getitem__(self, idx):
+        s = self.reader[idx // 2]
+
+        img = s["img"]
+        offset = 2 * (idx % 2)
+        kps = torch.tensor(s["keypoints"])[offset:offset+2]
+
+        len_line = np.linalg.norm(kps[0] - kps[1])
+        center = (kps[0] + kps[1]) / 2.0
+
+        # zoom in
+        crop_x0 = int(center[0] - len_line * self.zoom_in_factor / 2.0)
+        crop_x1 = int(center[0] + len_line * self.zoom_in_factor / 2.0)
+        crop_y0 = int(center[1] - len_line * self.zoom_in_factor / 2.0)
+        crop_y1 = int(center[1] + len_line * self.zoom_in_factor / 2.0)
+
+        img = img.crop((crop_x0, crop_y0, crop_x1, crop_y1))
+        kps = kps - torch.tensor([crop_x0, crop_y0])
+
+        # augment
+        if self.augment:
+            img, kps = ImageDataset.crop_augment(img, kps)
+
+        kps = kps / torch.tensor([img.width, img.height])
+        kps = kps.flatten()
+
+        img_tensor = ImageDataset.transforms(img)
+
+        return img_tensor, kps
+
