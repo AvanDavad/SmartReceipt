@@ -1,8 +1,9 @@
-from src.pl_module import CNNModule
+from src.models import CNNModule6Points
 from src.reader import ImageDataset, ImageReader
 from pathlib import Path
 
 PROJ_DIR = Path("/home/avandavad/projects/receipt_extractor")
+
 
 def main():
     train_reader = ImageReader(PROJ_DIR / "data" / "train")
@@ -13,15 +14,22 @@ def main():
 
     train_dataset[0]
 
-    version_num = 15
-    ckpt_name = "resnet-epoch=4558-val_loss=0.004.ckpt"
-    ckpt_path = PROJ_DIR / "lightning_logs" / f"version_{version_num}" / "checkpoints" / ckpt_name
-    model = CNNModule().load_from_checkpoint(ckpt_path)
+    version_num = 18
+    ckpt_name = "resnet-epoch=65-val_loss=0.00149"
+    ckpt_path = (
+        PROJ_DIR
+        / "lightning_logs"
+        / f"version_{version_num}"
+        / "checkpoints"
+        / f"{ckpt_name}.ckpt"
+    )
+    model = CNNModule6Points().load_from_checkpoint(ckpt_path)
 
     # inference
     img_path = PROJ_DIR / "data" / "test"
     for img_filename in img_path.glob("*.jpg"):
         model.inference(img_filename, val_dataset.transforms)
+
 
 if __name__ == "__main__":
     main()

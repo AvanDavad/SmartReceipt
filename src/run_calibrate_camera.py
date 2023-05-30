@@ -23,7 +23,7 @@ def main(args):
         img = cv2.imread(str(filename))
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         ret, corners = cv2.findChessboardCorners(gray, (9,6), None)
-        assert ret, filename
+        assert ret, f"failed to find corners in {filename}. remove it and start over"
         cv2.cornerSubPix(
             gray,
             corners,
@@ -35,7 +35,7 @@ def main(args):
         objpoints.append(objp)
 
         cv2.drawChessboardCorners(img, (9,6), corners, ret)
-        Image.fromarray(img).save(out_corners_dir / filename.name)
+        Image.fromarray(img[..., ::-1]).save(out_corners_dir / filename.name)
 
     _, mtx, dist, _, _ = cv2.calibrateCamera(
         objpoints,
@@ -44,8 +44,8 @@ def main(args):
         None,
         None,
     )
-    print(f"camera matrix:\n{mtx}")
-    print(f"distortion coefficients:\n{dist}")
+    print(f"camera matrix:\n{mtx}\n")
+    print(f"distortion coefficients:\n{dist}\n")
 
     # saving camera matrix and distortion coefficients
     camera_calib = {
@@ -60,12 +60,11 @@ def main(args):
     print(f"saved camera matrix and distortion coefficients to {filename}")
 
 if __name__ == "__main__":
-    # creating argparser
     parser = argparse.ArgumentParser(description="Calibrate camera")
     parser.add_argument("--grid_size", type=float, default=21.8, help="size of grid in mm")
     parser.add_argument("--img_dir", type=str, default="calib", help="directory containing calibration images")
     parser.add_argument("--img_ext", type=str, default="jpeg", help="extension of calibration images")
-    parser.add_argument("--output", type=str, default="camera_matrix.json", help="output file for camera matrix and distortion coefficients")
+    parser.add_argument("--output", type=str, default="camera_calib.json", help="output file for camera matrix and distortion coefficients")
     args = parser.parse_args()
 
     main(args)
