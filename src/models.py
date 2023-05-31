@@ -51,7 +51,7 @@ class CNNModule6Points(pl.LightningModule):
 
         self.log("val_loss", loss, prog_bar=True)
 
-    def inference(self, img_path, preproc, out_folder=Path("")):
+    def inference(self, img_path, preproc, out_folder=Path(""), prefix="inference"):
         img = Image.open(img_path)
         img_tensor = preproc(img)
         img_tensor = img_tensor.unsqueeze(0)
@@ -100,7 +100,8 @@ class CNNModule6Points(pl.LightningModule):
             draw.line((start_point, end_point), fill=col, width=line_width)
 
         # Save the image to a file
-        filename = out_folder / f"inference_{img_path.stem}.jpg"
+        prefix = f"{prefix}_" if prefix else ""
+        filename = out_folder / f"{prefix}{img_path.stem}.jpg"
         img.save(filename)
         print(f"saved {filename}")
         return np.array(keypoints).astype(np.float64)
