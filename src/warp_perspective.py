@@ -58,5 +58,5 @@ def warp_perspective(img, img_pts, camera_matrix, dist_coeffs, scale_factor=10.0
     out_img = Image.fromarray(out)
 
     new_img_pts = cv2.perspectiveTransform(img_pts.reshape(-1, 1, 2), M).reshape(-1, 2)
-    return out_img, new_img_pts
+    return out_img, new_img_pts, M
 
