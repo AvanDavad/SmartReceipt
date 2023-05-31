@@ -147,3 +147,55 @@ class CNNModule2Points(pl.LightningModule):
         loss = self.loss_module(kps, kps_pred)
 
         self.log("val_loss", loss, prog_bar=True)
+
+
+
+
+class CNNModuleLineDetection(pl.LightningModule):
+    def __init__(self):
+        super().__init__()
+
+        self.backbone = models.resnet18(weights=ResNet18_Weights.DEFAULT)
+
+        num_features = self.backbone.fc.in_features
+        self.backbone.fc = nn.Linear(num_features, 9)
+
+        self.kps_loss_module = nn.L1Loss()
+        self.bce_loss_module = nn.BCEWithLogitsLoss()
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        out = self.backbone(x)
+        kps = out[:, :8]
+        is_last = out[:, 8:9]
+        return kps, is_last
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-4)
+        return optimizer
+
+    def training_step(self, batch, batch_idx):
+        inp_img, kps, is_last = batch
+
+        kps_pred, is_last_pred = self(inp_img)
+
+        kps_loss = self.kps_loss_module(kps, kps_pred)
+        cls_loss = self.bce_loss_module(is_last_pred, is_last)
+        loss = kps_loss + cls_loss
+
+        self.log("train_loss", loss, prog_bar=True)
+
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        inp_img, kps, is_last = batch
+
+        kps_pred, is_last_pred = self(inp_img)
+
+        kps_loss = self.kps_loss_module(kps, kps_pred)
+        cls_loss = self.bce_loss_module(is_last_pred, is_last)
+        loss = kps_loss + cls_loss
+
+        self.log("val_loss", loss, prog_bar=True)
+
+        return loss
