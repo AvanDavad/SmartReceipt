@@ -5,6 +5,8 @@ from PIL import Image
 import json
 from pathlib import Path
 
+from src.draw_utils import save_img_with_kps
+import numpy as np
 
 class ImageReader:
     def __init__(self, rootdir):
@@ -34,14 +36,11 @@ class ImageReader:
         return sample
 
 
-    def show(self, idx):
-        plt.figure(figsize=(16,8))
+    def show(self, idx, out_folder):
         s = self[idx]
-        plt.imshow(s["img"])
-        kps = s["keypoints"]
-        for i in range(len(kps)):
-            plt.scatter(kps[i][0], kps[i][1], c="b", s=10)
-        filename = f"visualization/image_reader/sample_{idx}.jpg"
-        plt.savefig(filename)
-        print(f"saved {filename}")
-        plt.close()
+        img = s["img"]
+        kps = np.array(s["keypoints"])
+
+        filename = out_folder / f"sample_{idx}.jpg"
+
+        save_img_with_kps(img, kps, filename, circle_color="yellow", circle_radius=7)
