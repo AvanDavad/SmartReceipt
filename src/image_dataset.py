@@ -4,7 +4,9 @@ import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
 import matplotlib.pyplot as plt
+from PIL import Image
 
+from src.draw_utils import save_img_with_kps
 
 class ImageDataset(Dataset):
     MEAN = [0.485, 0.456, 0.406]
@@ -85,21 +87,19 @@ class ImageDataset(Dataset):
 
         return img, kps
 
-    def show(self, idx, out_folder, repeat_idx=0):
-        plt.figure(figsize=(12, 12))
-        img_tensor, kps_tensor = self[idx]
-
+    @staticmethod
+    def img_from_tensor(img_tensor):
         img = img_tensor.permute(1, 2, 0).numpy()
         img = (img * np.array(ImageDataset.STD) + np.array(ImageDataset.MEAN)) * 255
         img = img.astype(np.uint8)
+        img = Image.fromarray(img)
+        return img
 
+    def show(self, idx, out_folder, repeat_idx=0):
+        img_tensor, kps_tensor = self[idx]
+
+        img = ImageDataset.img_from_tensor(img_tensor)
         kps = kps_tensor.reshape(-1, 2).numpy() * ImageDataset.IMG_SIZE
-
-        plt.imshow(img)
-        for i in range(len(kps)):
-            plt.scatter(kps[i][0], kps[i][1], c="b", s=10)
-
         filename = out_folder / f"sample_{idx}_{repeat_idx}.jpg"
-        plt.savefig(filename)
-        print(f"saved {filename}")
-        plt.close()
+
+        save_img_with_kps(img, kps, filename, circle_radius=1)

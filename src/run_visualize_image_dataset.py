@@ -3,7 +3,7 @@ from pathlib import Path
 from src.image_dataset import ImageDataset
 from src.image_reader import ImageReader
 
-from src.reader import LineDataset
+from src.line_dataset import LineDataset
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
