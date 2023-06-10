@@ -1,6 +1,8 @@
 from pytorch_lightning import Trainer
+from src.image_dataset import ImageDataset
+from src.image_reader import ImageReader
 from src.models import CNNModule2Points, CNNModule6Points
-from src.reader import ImageDataset, ImageReader, Top2PointsDataset
+from src.reader import Top2PointsDataset
 from torch.utils.data import DataLoader
 from pathlib import Path
 from pytorch_lightning.callbacks import ModelCheckpoint
@@ -23,8 +25,8 @@ def main(args):
     if args.from_scratch:
         model = CNNModule2Points()
     else:
-        version_num = 0
-        ckpt_name = "resnet-epoch=95-val_loss=0.02007"
+        version_num = 1
+        ckpt_name = "resnet-epoch=56-val_loss=0.00995"
         ckpt_path = (
             PROJ_DIR
             / "model_checkpoints"
@@ -46,7 +48,7 @@ def main(args):
     trainer = Trainer(
         default_root_dir=PROJ_DIR / "model_checkpoints" / "CNNModule2Points",
         accelerator="gpu",
-        max_epochs=100,
+        max_epochs=200,
         callbacks=[checkpoint_callback],
         log_every_n_steps=3,
     )
