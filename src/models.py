@@ -171,8 +171,11 @@ class CNNModuleLineDetection(pl.LightningModule):
         return kps, is_last
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-4)
+        optimizer = torch.optim.Adam(self.parameters(), lr=3e-6)
         return optimizer
+
+    def _combine_losses(self, kps_loss, cls_loss):
+        return 20 * kps_loss + cls_loss
 
     def training_step(self, batch, batch_idx):
         inp_img, kps, is_last = batch
@@ -181,7 +184,7 @@ class CNNModuleLineDetection(pl.LightningModule):
 
         kps_loss = self.kps_loss_module(kps, kps_pred)
         cls_loss = self.bce_loss_module(is_last_pred, is_last)
-        loss = kps_loss + cls_loss
+        loss = self._combine_losses(kps_loss, cls_loss)
 
         self.log("train_loss", loss, prog_bar=True)
 
@@ -194,7 +197,7 @@ class CNNModuleLineDetection(pl.LightningModule):
 
         kps_loss = self.kps_loss_module(kps, kps_pred)
         cls_loss = self.bce_loss_module(is_last_pred, is_last)
-        loss = kps_loss + cls_loss
+        loss = self._combine_losses(kps_loss, cls_loss)
 
         self.log("val_loss", loss, prog_bar=True)
 
