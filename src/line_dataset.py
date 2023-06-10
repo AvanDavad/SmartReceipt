@@ -1,7 +1,7 @@
 from src.camera_calib import get_camera_calib
 from src.draw_utils import save_img_with_kps
 from src.image_dataset import ImageDataset
-from src.warp_perspective import warp_perspective
+from src.warp_perspective import warp_perspective_with_nonlin_least_squares
 
 import cv2
 import numpy as np
@@ -10,26 +10,23 @@ from PIL import Image
 from torch.utils.data import Dataset
 
 
-from pathlib import Path
-
-
 class LineDataset(Dataset):
-    def __init__(self, reader, augment=False, shuffle=False):
-        self.reader = reader
+    def __init__(self, image_reader, augment=False, shuffle=False):
+        self.image_reader = image_reader
         self.augment = augment
 
         self.mapping = []
-        for i in range(len(self.reader)):
-            s = self.reader[i]
-            if "lines" in s:
-                num_lines = len(s["lines"]) // 2 - 1
-                for j in range(num_lines):
-                    self.mapping.append((i, j, num_lines))
+        for i in range(len(self.image_reader)):
+            s = self.image_reader[i]
+            num_lines = len(s["phase_1"]["lines"]) - 1
+            for j in range(num_lines):
+                self.mapping.append((i, j, num_lines))
 
-        if shuffle:
-            self.idx_list = np.random.permutation(len(self.mapping))
-        else:
-            self.idx_list = np.arange(len(self.mapping))
+        self.idx_list = (
+            np.random.permutation(len(self.mapping))
+            if shuffle
+            else np.arange(len(self.mapping))
+        )
 
     def __len__(self):
         return len(self.mapping)
@@ -37,9 +34,9 @@ class LineDataset(Dataset):
     def __getitem__(self, idx):
         idx_mod = self.idx_list[idx]
         i, j, num_lines = self.mapping[idx_mod]
-        s = self.reader[i]
+        s = self.image_reader[i]
 
-        img = s["img"]
+        img = s["phase_1"]["img"]
         line_kps = np.array(s["lines"])
 
         is_last = j == num_lines - 1
@@ -50,7 +47,7 @@ class LineDataset(Dataset):
             base_kps += np.random.randn(*base_kps.shape) * 5.0
 
         camera_matrix, dist_coeffs = get_camera_calib()
-        img, base_kps, M = warp_perspective(
+        img, base_kps, M = warp_perspective_with_nonlin_least_squares(
             img, base_kps, camera_matrix, dist_coeffs, scale_factor=10.0, verbose=False
         )
         line_kps = cv2.perspectiveTransform(line_kps.reshape(-1, 1, 2), M).reshape(
@@ -106,4 +103,6 @@ class LineDataset(Dataset):
 
         filename = out_folder / f"sample_{idx}_{repeat_idx}.jpg"
         color = "red" if (is_last.item() == 1.0) else "yellow"
-        save_img_with_kps(img, curr_line_kps, filename, circle_color=color, circle_radius=1)
+        save_img_with_kps(
+            img, curr_line_kps, filename, circle_color=color, circle_radius=1
+        )

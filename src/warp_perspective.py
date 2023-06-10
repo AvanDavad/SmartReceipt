@@ -7,9 +7,13 @@ from scipy.optimize import least_squares
 
 np.set_printoptions(suppress=True, precision=3)
 
+
 def get_obj_points(height):
-    objp = np.array([[0, 0, 0], [9, 0, 0], [55, 0, 0], [64, 0, 0], [0, height, 0], [64, height, 0]])
+    objp = np.array(
+        [[0, 0, 0], [9, 0, 0], [55, 0, 0], [64, 0, 0], [0, height, 0], [64, height, 0]]
+    )
     return objp
+
 
 def decode_x(x):
     rvec = x[0:3]
@@ -17,6 +21,7 @@ def decode_x(x):
     height = x[6]
     obj_pts = get_obj_points(height)
     return rvec, tvec, height, obj_pts
+
 
 def residual_function(x, gt_points, camera_matrix, dist_coeffs):
     rvec, tvec, _, obj_pts = decode_x(x)
@@ -26,8 +31,14 @@ def residual_function(x, gt_points, camera_matrix, dist_coeffs):
 
     return (img_pts - gt_points).flatten()
 
-def warp_perspective(img, img_pts, camera_matrix, dist_coeffs, scale_factor=10.0, verbose=True):
+def warp_perspective(img, transformation_matrix, dest_size_wh):
+    out = cv2.warpPerspective(np.array(img), np.array(transformation_matrix), dest_size_wh)
+    out_img = Image.fromarray(out)
+    return out_img
 
+def warp_perspective_with_nonlin_least_squares(
+    img, img_pts, camera_matrix, dist_coeffs, scale_factor=10.0, verbose=True
+):
     assert img_pts.shape == (6, 2), f"img_pts.shape is {img_pts.shape}, expected (6, 2)"
     ret = least_squares(
         fun=residual_function,
@@ -45,18 +56,15 @@ def warp_perspective(img, img_pts, camera_matrix, dist_coeffs, scale_factor=10.0
 
     img_pts, _ = cv2.projectPoints(obj_pts, rvec, tvec, camera_matrix, dist_coeffs)
 
-    dst = obj_pts[[0,3,4,5], :2].astype(np.float32)*scale_factor
-    dst += np.array([5., 5.]) * scale_factor
+    dst = obj_pts[[0, 3, 4, 5], :2].astype(np.float32) * scale_factor
+    dst += np.array([5.0, 5.0]) * scale_factor
 
-    dst_width = int(dst[:, 0].max() + 5*scale_factor)
-    dst_height = int(dst[:, 1].max() + 20*scale_factor)
+    dst_width = int(dst[:, 0].max() + 5 * scale_factor)
+    dst_height = int(dst[:, 1].max() + 20 * scale_factor)
 
-    M = cv2.getPerspectiveTransform(img_pts[[0,3,4,5],0,:].astype(np.float32), dst)
+    M = cv2.getPerspectiveTransform(img_pts[[0, 3, 4, 5], 0, :].astype(np.float32), dst)
 
-    src_img = np.array(img)
-    out = cv2.warpPerspective(src_img, M, (dst_width, dst_height))
-    out_img = Image.fromarray(out)
+    out_img = warp_perspective(img, M, (dst_width, dst_height))
 
     new_img_pts = cv2.perspectiveTransform(img_pts.reshape(-1, 1, 2), M).reshape(-1, 2)
     return out_img, new_img_pts, M
-
