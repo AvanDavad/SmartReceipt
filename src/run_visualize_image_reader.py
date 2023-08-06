@@ -3,6 +3,15 @@ from pathlib import Path
 from src.image_reader import ImageReader
 import time
 
+def remove_dir_with_all_contents(dir):
+    if dir.is_dir():
+        for file in dir.iterdir():
+            if file.is_dir():
+                remove_dir_with_all_contents(file)
+            else:
+                file.unlink()
+        dir.rmdir()
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--rootdir", type=str, default="/home/avandavad/projects/receipt_extractor/data")
@@ -11,9 +20,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     out_folder = Path(args.out_folder) / args.split
-    out_folder.mkdir(parents=True, exist_ok=True)
-    for file in out_folder.iterdir():
-        file.unlink()
+    remove_dir_with_all_contents(out_folder)
+
+    out_folder.mkdir(parents=True, exist_ok=False)
 
     reader = ImageReader(Path(args.rootdir) / args.split)
     print(f"Number of samples: {len(reader)}")
