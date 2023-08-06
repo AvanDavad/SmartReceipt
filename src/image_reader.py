@@ -90,20 +90,45 @@ class ImageReader:
             line_y0 = s["phase_1"]["lines"][:-1]
             line_y1 = s["phase_1"]["lines"][1:]
             x_offset = 0
+            text_offset = 0
             for i, (ly0, ly1) in enumerate(zip(line_y0, line_y1)):
                 img_line = ortho_img_np[int(ly0):int(ly1), :, :]
-                fig, ax = plt.subplots(2, 1, figsize=(10, 10))
+                fig, ax = plt.subplots(3, 1, figsize=(10, 3))
                 ax[0].imshow(img_line)
                 ax[1].imshow(img_line)
-                for x in s["phase_2_3"]["lines"]:
+                ax[2].imshow(img_line // 2)
+                first_line = True
+                for j, x in enumerate(s["phase_2_3"]["lines"]):
                     if x - x_offset < 0:
                         continue
                     if x - x_offset > img_line.shape[1]:
                         break
                     ax[1].plot([x - x_offset, x - x_offset], [0, img_line.shape[0]], c="r", linewidth=1)
+                    ax[2].plot([x - x_offset, x - x_offset], [0, img_line.shape[0]], c="r", linewidth=1)
+                    if not first_line:
+                        ch = s["phase_2_3"]["text"][j-1]
+                        x0 = s["phase_2_3"]["lines"][j-1] - x_offset
+                        x1 = s["phase_2_3"]["lines"][j] - x_offset
+                        ax[2].text(
+                            (x0+x1)/2,
+                            img_line.shape[0]/2,
+                            ch,
+                            fontsize=14,
+                            color="white",
+                            horizontalalignment="center",
+                            verticalalignment="center",
+                        )
+                    first_line = False
+                ax[0].set_xticks([])
+                ax[1].set_xticks([])
+                ax[2].set_xticks([])
+                ax[0].set_yticks([])
+                ax[1].set_yticks([])
+                ax[2].set_yticks([])
 
                 filename = out_folder / f"sample_phase_2_3_{i}.jpg"
                 plt.savefig(filename)
                 plt.close()
 
                 x_offset += img_line.shape[1]
+                text_offset += j-1

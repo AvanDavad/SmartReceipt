@@ -29,4 +29,5 @@ if __name__ == "__main__":
     time.sleep(2)
 
     for idx in range(len(reader)):
+        print(f"Processing {idx}th sample")
         reader.show(idx, out_folder)
