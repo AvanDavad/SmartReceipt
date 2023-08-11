@@ -5,7 +5,6 @@ from PIL import Image
 import json
 from pathlib import Path
 
-from src.draw_utils import save_img_with_kps
 import numpy as np
 import cv2
 
