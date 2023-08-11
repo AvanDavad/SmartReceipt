@@ -1,6 +1,12 @@
+"""
+examples:
+python3 -m src.run_visualize_image_reader --split train
+python3 -m src.run_visualize_image_reader --split val
+"""
+
 import argparse
 from pathlib import Path
-from src.image_reader import ImageReader
+from src.readers.image_reader import ImageReader
 import time
 
 def remove_dir_with_all_contents(dir):
