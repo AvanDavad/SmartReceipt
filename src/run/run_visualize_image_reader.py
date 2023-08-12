@@ -1,7 +1,7 @@
 """
 examples:
-python3 -m src.run_visualize_image_reader --split train
-python3 -m src.run_visualize_image_reader --split val
+python3 -m src.run.run_visualize_image_reader --split train
+python3 -m src.run.run_visualize_image_reader --split val
 """
 
 import argparse
@@ -18,13 +18,7 @@ def remove_dir_with_all_contents(dir):
                 file.unlink()
         dir.rmdir()
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--rootdir", type=str, default="/home/avandavad/projects/receipt_extractor/data")
-    parser.add_argument("--split", type=str, default="train")
-    parser.add_argument("--out_folder", type=str, default="visualization/image_reader")
-    args = parser.parse_args()
-
+def main(args):
     out_folder = Path(args.out_folder) / args.split
     remove_dir_with_all_contents(out_folder)
 
@@ -37,3 +31,12 @@ if __name__ == "__main__":
     for idx in range(len(reader)):
         print(f"Processing {idx}th sample")
         reader.show(idx, out_folder)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--rootdir", type=str, default="/home/avandavad/projects/receipt_extractor/data")
+    parser.add_argument("--split", type=str, default="train")
+    parser.add_argument("--out_folder", type=str, default="visualization/image_reader")
+    args = parser.parse_args()
+
+    main(args)

@@ -1,25 +1,26 @@
 import abc
 from src.annotate.zoom_handler import ImageZoomHandler
 from src.camera_calib import get_camera_calib
+from src.visualization.font import get_font
 from src.warp_perspective import warp_perspective, warp_perspective_with_nonlin_least_squares
 
 import numpy as np
-from PIL import Image, ImageFont
+from PIL import Image
 
 
-PHASE_1_NUM_KEYPOINTS = 6
-FONT = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSerif.ttf", size=20)
+PHASE_1_NUM_KEYPOINTS = 4
+FONT = get_font(font_size=20)
 
 
 BASEPOINT_CORNER_INDICES = {
     "topleft": 0,
-    "topright": 3,
-    "bottomleft": 4,
-    "bottomright": 5,
-    "top": [0, 1, 2, 3],
-    "bottom": [4, 5],
-    "left": [0, 4],
-    "right": [3, 5],
+    "topright": 1,
+    "bottomleft": 2,
+    "bottomright": 3,
+    "top": [0, 1],
+    "bottom": [2, 3],
+    "left": [0, 2],
+    "right": [1, 3],
 }
 
 def draw_lines_x(draw, lines_x, zoom_handler, img_height):
@@ -92,15 +93,15 @@ class Phase0Handler(PhaseHandler):
         for base_point in self.base_points:
             p = self.zoom_handler.transform_img2canvas(base_point).astype(np.int64)
             draw.ellipse((p[0] - 5, p[1] - 5, p[0] + 5, p[1] + 5), fill="red")
-        # draw line
-        for line_idx in range(3):
-            if len(self.base_points) < 2 * line_idx + 2:
+        # draw lines
+        for p0, p1 in [(0,1), (0,2), (1,3), (2,3)]:
+            if len(self.base_points) < p1 + 1:
                 break
             line_pt0 = self.zoom_handler.transform_img2canvas(
-                self.base_points[2 * line_idx]
+                self.base_points[p0]
             ).astype(int)
             line_pt1 = self.zoom_handler.transform_img2canvas(
-                self.base_points[2 * line_idx + 1]
+                self.base_points[p1]
             ).astype(int)
             draw.line(
                 (line_pt0[0], line_pt0[1], line_pt1[0], line_pt1[1]),
