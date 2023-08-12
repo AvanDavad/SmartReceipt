@@ -45,6 +45,7 @@ def main(args):
         filename="resnet-{epoch:02d}-{val_loss:.5f}",
         save_top_k=3,
         mode="min",
+        save_last=True,
     )
 
     trainer = Trainer(
