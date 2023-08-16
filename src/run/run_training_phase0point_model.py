@@ -53,7 +53,7 @@ def main(args):
         accelerator="gpu",
         max_epochs=args.max_epochs,
         callbacks=[checkpoint_callback],
-        log_every_n_steps=3,
+        log_every_n_steps=1,
     )
     trainer.validate(model, val_dataloader)
 

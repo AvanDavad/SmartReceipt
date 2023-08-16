@@ -9,6 +9,13 @@ np.set_printoptions(suppress=True, precision=3)
 
 PHASE_1_NUM_KEYPOINTS = 4
 
+X0_LIST = [
+    np.array([0.0, 0.0, 0.0, 0, 0, 800.0, 50.0]),
+    np.array([0.0, 0.0, np.pi, 0, 0, 800.0, 50.0]),
+    np.array([0.0, 0.0, 0.0, 0, 0, 100.0, 50.0]),
+    np.array([0.0, 0.0, np.pi, 0, 0, 100.0, 50.0]),
+]
+
 def get_obj_points(height):
     objp = np.array(
         [[0, 0, 0], [64.0, 0, 0], [0, height, 0], [64.0, height, 0]]
@@ -40,14 +47,22 @@ def warp_perspective(img, transformation_matrix, dest_size_wh):
 def warp_perspective_with_nonlin_least_squares(
     img, img_pts, camera_matrix, dist_coeffs, scale_factor=10.0, verbose=True
 ):
-    assert img_pts.shape == (PHASE_1_NUM_KEYPOINTS, 2), f"img_pts.shape is {img_pts.shape}, expected (6, 2)"
-    ret = least_squares(
-        fun=residual_function,
-        x0=np.array([-0.1, 0.1, 0.1, -10, -10, 100.0, 50.0]),
-        jac="3-point",
-        args=(img_pts, camera_matrix, dist_coeffs),
-    )
-    assert ret.success, f"least_squares failed with message: {ret.message}"
+    assert img_pts.shape == (PHASE_1_NUM_KEYPOINTS, 2), f"img_pts.shape is {img_pts.shape}, expected ({PHASE_1_NUM_KEYPOINTS}, 2)"
+
+    for x0 in X0_LIST:
+        print(f"Trying x0: {x0}")
+        ret = least_squares(
+            fun=residual_function,
+            x0=x0,
+            jac="2-point",
+            args=(img_pts, camera_matrix, dist_coeffs),
+            method="lm",
+        )
+        if ret.success and ret.x[-1] > 0:
+            print(f"least_squares succeeded! solution: {ret.x}")
+            break
+        else:
+            print(f"least_squares failed with message: {ret.message}")
 
     rvec, tvec, height, obj_pts = decode_x(ret.x)
     if verbose:
