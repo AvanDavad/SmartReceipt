@@ -24,15 +24,24 @@ def main(args):
     model = CNNModulePhase0Points().load_from_checkpoint(ckpt_path)
 
     # inference
-    img_path = PROJ_DIR / "data" / "test"
-    out_folder = PROJ_DIR / "inference" / f"version_{args.version_num}"
-    out_folder.mkdir(exist_ok=True, parents=True)
-    for img_filename in img_path.glob("*.jpg"):
+    img_path_test = PROJ_DIR / "data" / "test"
+    img_path_train = PROJ_DIR / "data" / "train"
+    out_folder_test = PROJ_DIR / "inference" / f"version_{args.version_num}" / "test"
+    out_folder_train = PROJ_DIR / "inference" / f"version_{args.version_num}" / "train"
+    out_folder_test.mkdir(exist_ok=True, parents=True)
+    out_folder_train.mkdir(exist_ok=True, parents=True)
+
+    for img_filename in img_path_test.glob("*.jpg"):
         model.inference(
             img_filename,
-            out_folder=out_folder,
+            out_folder=out_folder_test,
         )
 
+    for img_filename in img_path_train.glob("*.jpg"):
+        model.inference(
+            img_filename,
+            out_folder=out_folder_train,
+        )
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()

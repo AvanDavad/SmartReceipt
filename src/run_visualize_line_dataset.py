@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-from src.image_reader import ImageReader
+from src.readers.image_reader import ImageReader
 
 from src.line_dataset import LineDataset
 

@@ -1,6 +1,6 @@
 from src.camera_calib import get_camera_calib
 from src.draw_utils import save_img_with_kps
-from src.image_dataset import ImageDataset
+from src.datasets.phase0points_dataset import Phase0PointsDataset
 from src.warp_perspective import warp_perspective_with_nonlin_least_squares
 
 import cv2
@@ -89,7 +89,7 @@ class LineDataset(Dataset):
         curr_line_kps = curr_line_kps.flatten()
         curr_line_kps = torch.from_numpy(curr_line_kps)
 
-        img_tensor = ImageDataset.TRANSFORMS(img)
+        img_tensor = Phase0PointsDataset.TRANSFORMS(img)
 
         is_last = torch.tensor([is_last]).float()
         return img_tensor, curr_line_kps, is_last
@@ -97,9 +97,11 @@ class LineDataset(Dataset):
     def show(self, idx, out_folder, repeat_idx=0):
         img_tensor, curr_line_kps, is_last = self[idx]
 
-        img = ImageDataset.img_from_tensor(img_tensor)
+        img = Phase0PointsDataset.img_from_tensor(img_tensor)
 
-        curr_line_kps = curr_line_kps.reshape(-1, 2).numpy() * ImageDataset.IMG_SIZE
+        curr_line_kps = (
+            curr_line_kps.reshape(-1, 2).numpy() * Phase0PointsDataset.IMG_SIZE
+        )
 
         filename = out_folder / f"sample_{idx}_{repeat_idx}.jpg"
         color = "red" if (is_last.item() == 1.0) else "yellow"

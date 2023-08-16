@@ -1,6 +1,6 @@
 import argparse
 from pytorch_lightning import Trainer
-from src.image_reader import ImageReader
+from src.readers.image_reader import ImageReader
 from src.models import CNNModuleLineDetection
 from src.line_dataset import LineDataset
 from torch.utils.data import DataLoader
