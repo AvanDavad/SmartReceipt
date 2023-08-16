@@ -1,5 +1,5 @@
 """
-python3 -m src.run_visualize_phase0points_dataset --augment --repeat 3
+python3 -m src.run.run_visualize_phase0points_dataset --augment --repeat 3
 """
 
 import argparse

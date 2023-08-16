@@ -3,7 +3,6 @@ import argparse
 from src.camera_calib import get_camera_calib
 from src.draw_utils import save_img_with_kps, save_img_with_texts
 from src.datasets.phase0points_dataset import Phase0PointsDataset
-from src.models import CNNModuleLineDetection
 from pathlib import Path
 from PIL import Image
 from PIL import ImageDraw
@@ -11,11 +10,10 @@ import numpy as np
 from src.models.phase0points_model import CNNModulePhase0Points
 from src.warp_perspective import warp_perspective_with_nonlin_least_squares
 
-PROJ_DIR = Path("/home/avandavad/projects/receipt_extractor")
-
+PROJ_DIR = Path(__file__).parent.parent
 
 def main(args):
-    out_folder = Path(args.out_folder)
+    out_folder = PROJ_DIR / args.out_folder / f"version_{args.version_num}"
     out_folder.mkdir(exist_ok=True)
     for file in out_folder.iterdir():
         file.unlink()
@@ -25,7 +23,7 @@ def main(args):
     ckpt_path = (
         PROJ_DIR
         / "model_checkpoints"
-        / "CNNModule6Points"
+        / "CNNModulePhase0Points"
         / "lightning_logs"
         / f"version_{version_num}"
         / "checkpoints"
@@ -39,7 +37,6 @@ def main(args):
     img_path = args.img_filename
     img_pts = model.inference(
         Path(img_path),
-        Phase0PointsDataset.TRANSFORMS,
         out_folder=out_folder,
         prefix="0_inference",
     )

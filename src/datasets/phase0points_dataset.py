@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
+import torchvision.transforms.functional as TF
 from PIL import Image
 
 from src.draw_utils import save_img_with_kps
@@ -9,9 +10,9 @@ from src.readers.image_reader import ImageReader
 
 
 class Phase0PointsDataset(Dataset):
-    MEAN = [0.485, 0.456, 0.406]
-    STD = [0.229, 0.224, 0.225]
-    IMG_SIZE = 224
+    MEAN = [0.5, 0.5, 0.5]
+    STD = [0.2, 0.2, 0.2]
+    IMG_SIZE = 768
     TRANSFORMS = transforms.Compose(
         [
             transforms.Resize(IMG_SIZE),
@@ -36,11 +37,17 @@ class Phase0PointsDataset(Dataset):
 
         # augment
         if self.augment:
-            # rotation augmentation
-            if np.random.rand() > 0.5:
+            if np.random.rand() < 0.5:
+                img, kps = Phase0PointsDataset.color_augment(img, kps)
+
+            if np.random.rand() < 0.5:
                 img, kps = Phase0PointsDataset.rotate(img, kps)
 
-            img, kps = Phase0PointsDataset.crop_augment(img, kps)
+            if np.random.rand() < 0.5:
+                img, kps = Phase0PointsDataset.perspective_augment(img, kps)
+
+            if np.random.rand() < 0.5:
+                img, kps = Phase0PointsDataset.crop_augment(img, kps)
 
         kps = kps / torch.tensor([img.width, img.height])
         kps = kps.flatten()
@@ -48,6 +55,15 @@ class Phase0PointsDataset(Dataset):
         img_tensor = Phase0PointsDataset.TRANSFORMS(img)
 
         return img_tensor, kps
+
+    @staticmethod
+    def color_augment(img, kps):
+        img = TF.adjust_brightness(img, 0.7 + np.random.rand() * 1.5)
+        img = TF.adjust_contrast(img, 0.5 + np.random.rand() * 1.5)
+        img = TF.adjust_gamma(img, gamma=0.5 + np.random.rand(), gain = 0.5 + np.random.rand())
+        img = TF.adjust_hue(img, -0.5 + np.random.rand())
+        img = TF.adjust_saturation(img, np.random.rand() * 1.5)
+        return img, kps
 
     @staticmethod
     def rotate(img, kps):
@@ -60,12 +76,47 @@ class Phase0PointsDataset(Dataset):
             ]
         )
         rot_torch = torch.from_numpy(rotation_matrix.astype(np.float32))
-        img = transforms.functional.rotate(img, np.rad2deg(rotation_angle_rad))
+        img = TF.rotate(img, np.rad2deg(rotation_angle_rad))
 
         center = torch.tensor([img.width, img.height]) / 2
         kps = kps - center
         kps = torch.matmul(kps, rot_torch)
         kps = kps + center
+        return img, kps
+
+    @staticmethod
+    def perspective_augment(img, kps):
+        topleft = kps[0]
+        topright = kps[1]
+        bottomleft = kps[2]
+        bottomright = kps[3]
+
+        startpoints = [
+            topleft.to(dtype=torch.int32).tolist(),
+            topright.to(dtype=torch.int32).tolist(),
+            bottomright.to(dtype=torch.int32).tolist(),
+            bottomleft.to(dtype=torch.int32).tolist(),
+        ]
+
+        a = min([torch.linalg.norm(topleft - topright) * 0.1, torch.linalg.norm(topleft - bottomleft) * 0.1])
+        new_topleft = topleft + (-a + np.random.rand() * 2*a)
+        new_topleft = torch.clip(new_topleft, torch.tensor([0, 0]), torch.tensor([img.width, img.height]))
+        new_topright = topright + (-a + np.random.rand() * 2*a)
+        new_topright = torch.clip(new_topright, torch.tensor([0, 0]), torch.tensor([img.width, img.height]))
+        new_bottomleft = bottomleft + (-a + np.random.rand() * 2*a)
+        new_bottomleft = torch.clip(new_bottomleft, torch.tensor([0, 0]), torch.tensor([img.width, img.height]))
+        new_bottomright = bottomright + (-a + np.random.rand() * 2*a)
+        new_bottomright = torch.clip(new_bottomright, torch.tensor([0, 0]), torch.tensor([img.width, img.height]))
+
+        endpoints = [
+            new_topleft.to(dtype=torch.int32).tolist(),
+            new_topright.to(dtype=torch.int32).tolist(),
+            new_bottomright.to(dtype=torch.int32).tolist(),
+            new_bottomleft.to(dtype=torch.int32).tolist(),
+        ]
+        img = transforms.functional.perspective(img, startpoints, endpoints)
+        kps = torch.stack([new_topleft, new_topright, new_bottomleft, new_bottomright])
+
         return img, kps
 
     @staticmethod
@@ -107,4 +158,4 @@ class Phase0PointsDataset(Dataset):
         kps = kps_tensor.reshape(-1, 2).numpy() * Phase0PointsDataset.IMG_SIZE
         filename = out_folder / f"sample_{idx}_{repeat_idx}.jpg"
 
-        save_img_with_kps(img, kps, filename, circle_radius=1)
+        save_img_with_kps(img, kps, filename, circle_radius=10)
