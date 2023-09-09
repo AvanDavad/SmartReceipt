@@ -2,9 +2,7 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-import torchvision.models as models
-from PIL import Image, ImageDraw, ImageFont
-from torchvision.models import ResNet18_Weights
+from PIL import Image, ImageDraw
 
 
 from pathlib import Path
