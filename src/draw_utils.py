@@ -1,5 +1,6 @@
 from typing import List, Optional, Tuple, Union
 from PIL import Image, ImageDraw
+from PIL import ImageFont
 import numpy as np
 import cv2
 
@@ -72,8 +73,21 @@ def put_stuffs_on_img(
 
     return img
 
+def draw_text_on_image(img: Image.Image, text: str, pos, font_path: str = "arial.ttf", font_size: int = 24, font_color: str = "black"):
+    img = img.copy()
+    draw = ImageDraw.Draw(img)
+    font = ImageFont.truetype(font_path, font_size)
+    draw.text(pos, text, font=font, fill=font_color)
+    return img
+
+def draw_vertical_line(img: Image.Image, x: int, color: str = "red", width: int = 5):
+    img = img.copy()
+    draw = ImageDraw.Draw(img)
+    draw.line((x, 0, x, img.height), fill=color, width=width)
+    return img
+
 def save_img_with_kps(
-    img: Image, kps, filename, normalized=False, circle_radius=5, circle_color="blue"
+    img: Image.Image, kps, filename, normalized=False, circle_radius=5, circle_color="blue"
 ):
     img = img.copy()
     draw = ImageDraw.Draw(img)

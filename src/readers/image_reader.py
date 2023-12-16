@@ -17,6 +17,9 @@ class ImageReader:
             if annot_name.is_file():
                 self.data.append((img_name, annot_name))
 
+    def __repr__(self):
+        return f"ImageReader({len(self)} images)"
+
     def __len__(self):
         return len(self.data)
 
