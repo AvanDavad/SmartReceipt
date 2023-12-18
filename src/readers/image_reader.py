@@ -89,7 +89,7 @@ class ImageReader:
         return sample
 
 
-    def show(self, idx: int, out_folder: Path):
+    def show(self, idx: int, out_folder: Path, verbose: bool = False):
         out_folder = out_folder / str(idx).zfill(4)
         out_folder.mkdir(parents=True, exist_ok=True)
 
@@ -105,6 +105,7 @@ class ImageReader:
         plt.savefig(filename)
         plt.close()
 
+        has_phase_1 = False
         if sample.phase_1_image is not None:
             filename = out_folder / "sample_phase_1.jpg"
             fig, ax = plt.subplots(1, 1, figsize=(10, 10))
@@ -114,7 +115,9 @@ class ImageReader:
                 ax.plot([0, ortho_img.width], [line_y, line_y], c="r", linewidth=1)
             plt.savefig(filename)
             plt.close()
+            has_phase_1 = True
 
+        has_phase_2 = False
         if sample.phase_2_text is not None:
             ortho_img_np = np.array(ortho_img)
             out_folder = out_folder / "phase_2"
@@ -164,3 +167,10 @@ class ImageReader:
 
                 x_offset += img_line.shape[1]
                 text_offset += j-1
+            has_phase_2 = True
+
+        if verbose:
+            img_name, _ = self.data[idx]
+            has_phase_1_str = "\t\t" if has_phase_1 else "no phase_1"
+            has_phase_2_str = "\t\t" if has_phase_2 else "no phase_2"
+            print(f"{idx}: ({img_name.stem}) {has_phase_1_str} {has_phase_2_str}")
