@@ -1,8 +1,10 @@
-from pathlib import Path
+from src.readers.image_reader import ImageReader
+
+
 import tempfile
 import unittest
+from pathlib import Path
 
-from src.readers.image_reader import ImageReader
 
 class TestImageReader(unittest.TestCase):
     def setUp(self):
