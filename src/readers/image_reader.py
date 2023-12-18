@@ -26,6 +26,19 @@ class Sample:
     phase_2_text: Optional[str] = None
     phase_2_lines: Optional[np.ndarray] = None
 
+    def __repr__(self) -> str:
+        self_msg = "Sample("
+
+        self_msg = self_msg + f"\n\tphase_0_image {self.phase_0_image.size}"
+        self_msg = self_msg + f"\n\tphase_0_points {self.phase_0_points.shape}"
+        if self.phase_1_image is not None:
+            self_msg = self_msg + f"\n\tphase_1_image {self.phase_1_image.size}"
+            self_msg = self_msg + f"\n\tphase_1_lines {self.phase_1_lines.shape}"
+        if self.phase_2_lines is not None:
+            self_msg = self_msg + f"\n\tphase_2_lines {self.phase_2_lines.shape}"
+        self_msg = self_msg + "\n)"
+        return self_msg
+
 class ImageReader:
     def __init__(self, rootdir: Union[str, Path]):
         self.rootdir = Path(rootdir)
