@@ -26,6 +26,17 @@ class CharSample:
     patch: PatchSample
     post_patches: List[PatchSample]
 
+    def __repr__(self) -> str:
+        self_msg = "CharSample("
+
+        self_msg = self_msg + f"\n\timage {self.image.size}"
+        self_msg = self_msg + f"\n\t{len(self.pre_patches)} pre patches"
+        self_msg = self_msg + f"\n\t{len(self.post_patches)} post patches"
+        self_msg = self_msg + f"\n\tlabel: <{self.patch.label}>"
+        self_msg = self_msg + f"\n\tis_double_space: {self.patch.is_double_space}"
+        self_msg = self_msg + "\n)"
+        return self_msg
+
 class CharReader:
     def __init__(self, image_reader: ImageReader, w: int = 5):
         self.image_reader = image_reader
@@ -45,9 +56,10 @@ class CharReader:
 
             num_chars = len(text)
             for j in range(num_chars):
-                coord_x = (coords[j] + coords[j+1]) / 2
-                line_idx = int(np.floor(coord_x / line_width))
-                self.mapping.append((i, j, line_idx))
+                line_idx_start = int(np.floor(coords[j] / line_width))
+                line_idx_end = int(np.floor(coords[j+1] / line_width))
+                if line_idx_start == line_idx_end:
+                    self.mapping.append((i, j, line_idx_start))
 
     def __repr__(self):
         return f"CharReader(len={len(self)})"
@@ -68,8 +80,6 @@ class CharReader:
 
         img = i_sample.phase_1_image
         lines_y = i_sample.phase_1_lines
-        x0 = np.remainder(coords[j], img.width)
-        x1 = np.remainder(coords[j+1], img.width)
 
         pre_patches: List[PatchSample] = []
         for jj in range(self._w):
@@ -77,9 +87,10 @@ class CharReader:
                 pre_i, pre_j, pre_line_idx = self.mapping[idx - jj - 1]
                 if i == pre_i and line_idx == pre_line_idx:
                     x0_pre = np.remainder(coords[pre_j], img.width)
-                    x1_pre = np.remainder(coords[pre_j+1], img.width)
+                    x1_pre = x0_pre + coords[pre_j+1] - coords[pre_j]
                     patch = PatchSample(
                         crop_xyxy=(x0_pre, lines_y[line_idx], x1_pre, lines_y[line_idx+1]),
+                        label=text[pre_j],
                     )
                 else:
                     patch = PatchSample()
@@ -94,9 +105,10 @@ class CharReader:
                 post_i, post_j, post_line_idx = self.mapping[idx + jj + 1]
                 if i == post_i and line_idx == post_line_idx:
                     x0_post = np.remainder(coords[post_j], img.width)
-                    x1_post = np.remainder(coords[post_j+1], img.width)
+                    x1_post = x0_post + coords[post_j+1] - coords[post_j]
                     patch = PatchSample(
                         crop_xyxy=(x0_post, lines_y[line_idx], x1_post, lines_y[line_idx+1]),
+                        label=text[post_j],
                     )
                 else:
                     patch = PatchSample()
@@ -105,7 +117,9 @@ class CharReader:
             post_patches.append(patch)
         assert len(post_patches) == self._w
 
-        is_double_space = patch.label == " " and post_patches[0].label == " "
+        x0 = np.remainder(coords[j], img.width)
+        x1 = x0 + coords[j+1] - coords[j]
+        is_double_space = (text[j] == " " and post_patches[0].label == " ") or post_patches[0].label is None
 
         patch = PatchSample(
             crop_xyxy=(x0, lines_y[line_idx], x1, lines_y[line_idx+1]),
@@ -148,21 +162,24 @@ class CharReader:
         fig, ax = plt.subplots(1, 1, figsize=(10, 5))
         ax.imshow(img)
         patches_all = sample.pre_patches + [sample.patch] + sample.post_patches
-        colors = ["k"] * len(sample.pre_patches) + ["r"] + ["y"] * len(sample.post_patches)
+        current_color = "r"
+        colors = ["k"] * len(sample.pre_patches) + [current_color] + ["y"] * len(sample.post_patches)
         for patch, color in zip(patches_all, colors):
             if patch.crop_xyxy is not None:
                 x0, y0, x1, y1 = patch.crop_xyxy
-                ax.plot([x0, x1, x1, x0, x0], [y0, y0, y1, y1, y0], c=color, linewidth=2)
-                if patch.label is not None:
+                ax.plot([x0, x1-1.0, x1-1.0, x0, x0], [y0, y0, y1, y1, y0], c=color, linewidth=2)
+                if patch.label is not None and color == current_color:
                     ax.text(
                         (x0+x1)/2,
                         (y0+y1)/2,
                         patch.label,
-                        fontsize=14,
+                        fontsize=28,
                         color=color,
                         horizontalalignment="center",
                         verticalalignment="center",
                     )
+                if patch.is_double_space:
+                    ax.plot([x0, x1-1.0], [y0 + 0.1 * (y1-y0), y0 + 0.1 * (y1-y0)], c=color, linewidth=2)
         x0 = crop_xyxy[:, 0].min()
         y0 = crop_xyxy[:, 1].min()
         x1 = crop_xyxy[:, 2].max()
