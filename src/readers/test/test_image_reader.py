@@ -1,4 +1,4 @@
-from src.readers.image_reader import ImageReader
+from src.readers.image_reader import ImageReader, Sample
 
 
 import tempfile
@@ -14,8 +14,13 @@ class TestImageReader(unittest.TestCase):
     def test_reader_len(self):
         assert len(self.reader) == 1
 
+    def test_repr(self):
+        repr_msg = str(self.reader)
+        assert repr_msg == "ImageReader(1 images)"
+
     def test_get(self):
-        _ = self.reader[0]
+        sample = self.reader[0]
+        assert isinstance(sample, Sample)
 
     def test_show(self):
         with tempfile.TemporaryDirectory() as tempdir:
