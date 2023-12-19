@@ -1,3 +1,4 @@
+from pathlib import Path
 import numpy as np
 import torch
 from torch.utils.data import Dataset
@@ -7,7 +8,9 @@ from PIL import Image
 
 from src.draw_utils import save_img_with_kps
 from src.readers.image_reader import ImageReader
-
+from typing import Dict
+from torch import Tensor
+from typing import Tuple
 
 class Phase0PointsDataset(Dataset):
     MEAN = [0.5, 0.5, 0.5]
@@ -21,7 +24,7 @@ class Phase0PointsDataset(Dataset):
         ]
     )
 
-    def __init__(self, reader, augment):
+    def __init__(self, reader: ImageReader, augment: bool = False):
         assert isinstance(reader, ImageReader)
         self.reader = reader
         self.augment = augment
@@ -29,13 +32,12 @@ class Phase0PointsDataset(Dataset):
     def __len__(self):
         return len(self.reader)
 
-    def __getitem__(self, idx):
-        s = self.reader[idx]
+    def __getitem__(self, idx: int) -> Dict[str, Tensor]:
+        sample = self.reader[idx]
 
-        img = s["phase_0"]["img"]
-        kps = torch.tensor(s["phase_0"]["points"])[:6]
+        img = sample.phase_0_image
+        kps = torch.tensor(sample.phase_0_points).to(dtype=torch.float32)
 
-        # augment
         if self.augment:
             if np.random.rand() < 0.5:
                 img, kps = Phase0PointsDataset.color_augment(img, kps)
@@ -54,10 +56,15 @@ class Phase0PointsDataset(Dataset):
 
         img_tensor = Phase0PointsDataset.TRANSFORMS(img)
 
-        return img_tensor, kps
+        sample_t = {
+            "img": img_tensor,
+            "kps": kps,
+        }
+
+        return sample_t
 
     @staticmethod
-    def color_augment(img, kps):
+    def color_augment(img: Image.Image, kps: Tensor) -> Tuple[Image.Image, Tensor]:
         img = TF.adjust_brightness(img, 0.7 + np.random.rand() * 1.5)
         img = TF.adjust_contrast(img, 0.5 + np.random.rand() * 1.5)
         img = TF.adjust_gamma(img, gamma=0.5 + np.random.rand(), gain = 0.5 + np.random.rand())
@@ -66,7 +73,7 @@ class Phase0PointsDataset(Dataset):
         return img, kps
 
     @staticmethod
-    def rotate(img, kps):
+    def rotate(img: Image.Image, kps: Tensor) -> Tuple[Image.Image, Tensor]:
         rotation_angle_deg = np.random.rand() * 30 - 15
         rotation_angle_rad = np.deg2rad(rotation_angle_deg)
         rotation_matrix = np.array(
@@ -85,7 +92,7 @@ class Phase0PointsDataset(Dataset):
         return img, kps
 
     @staticmethod
-    def perspective_augment(img, kps):
+    def perspective_augment(img: Image.Image, kps: Tensor) -> Tuple[Image.Image, Tensor]:
         topleft = kps[0]
         topright = kps[1]
         bottomleft = kps[2]
@@ -120,7 +127,7 @@ class Phase0PointsDataset(Dataset):
         return img, kps
 
     @staticmethod
-    def crop_augment(img, kps):
+    def crop_augment(img: Image.Image, kps: Tensor) -> Tuple[Image.Image, Tensor]:
         kps_x0 = kps[:, 0].min().item()
         kps_x1 = kps[:, 0].max().item()
         kps_y0 = kps[:, 1].min().item()
@@ -142,8 +149,8 @@ class Phase0PointsDataset(Dataset):
         return img, kps
 
     @staticmethod
-    def img_from_tensor(img_tensor):
-        img = img_tensor.permute(1, 2, 0).numpy()
+    def img_from_tensor(img_tensor: Tensor) -> Image.Image:
+        img: np.ndarray = img_tensor.permute(1, 2, 0).numpy()
         img = (
             img * np.array(Phase0PointsDataset.STD) + np.array(Phase0PointsDataset.MEAN)
         ) * 255
@@ -151,11 +158,13 @@ class Phase0PointsDataset(Dataset):
         img = Image.fromarray(img)
         return img
 
-    def show(self, idx, out_folder, repeat_idx=0):
-        img_tensor, kps_tensor = self[idx]
+    def show(self, idx: int, out_folder: Path, repeat_idx=0, verbose: bool = False):
+        sample_t = self[idx]
+        img_tensor = sample_t["img"]
+        kps_tensor = sample_t["kps"]
 
         img = Phase0PointsDataset.img_from_tensor(img_tensor)
         kps = kps_tensor.reshape(-1, 2).numpy() * Phase0PointsDataset.IMG_SIZE
         filename = out_folder / f"sample_{idx}_{repeat_idx}.jpg"
 
-        save_img_with_kps(img, kps, filename, circle_radius=10)
+        save_img_with_kps(img, kps, filename, circle_radius=10, verbose=verbose)

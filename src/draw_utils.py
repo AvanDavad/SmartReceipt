@@ -87,7 +87,7 @@ def draw_vertical_line(img: Image.Image, x: int, color: str = "red", width: int 
     return img
 
 def save_img_with_kps(
-    img: Image.Image, kps, filename, normalized=False, circle_radius=5, circle_color="blue"
+    img: Image.Image, kps, filename, normalized=False, circle_radius=5, circle_color="blue", verbose: bool = False
 ):
     img = img.copy()
     draw = ImageDraw.Draw(img)
@@ -112,7 +112,8 @@ def save_img_with_kps(
         )
 
     img.save(filename)
-    print(f"saved {filename}")
+    if verbose:
+        print(f"saved {filename}")
 
 def save_img_with_texts(img, kps, filename, margin=5):
 
