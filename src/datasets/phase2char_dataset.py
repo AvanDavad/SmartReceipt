@@ -12,6 +12,8 @@ from PIL import Image
 from src.readers.char_reader import CharReader
 
 
+ALL_CHARS = "0123456789aábcdeéfghiíjklmnoóöőpqrstuúüűvwxyzAÁBCDEÉFGHIÍJKLMNOÓÖŐPQRSTUÚÜŰVWXYZ!#%()*+,-./:;<=>?[]_{|}~ "
+
 class Phase2CharDataset(Dataset):
     MEAN = [0.5, 0.5, 0.5]
     STD = [0.2, 0.2, 0.2]
@@ -73,9 +75,15 @@ class Phase2CharDataset(Dataset):
                 Phase2CharDataset.TRANSFORMS(img_patch)
             )
 
+        if sample.patch.label in ALL_CHARS:
+            target = ALL_CHARS.index(sample.patch.label)
+        else:
+            target = len(ALL_CHARS)
+
         sample_t = {
             "img":torch.stack(img_patches, dim=0),
-            "label":torch.tensor([ord(sample.patch.label)]),
+            "label_ascii":torch.tensor([ord(sample.patch.label)]),
+            "label_idx":torch.tensor([target]),
             "is_double_space":torch.tensor([sample.patch.is_double_space]),
             "char_width": torch.tensor([char_width]),
         }

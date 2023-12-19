@@ -1,18 +1,10 @@
-from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict, Tuple
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-import numpy as np
-from torch.nn.functional import sigmoid
-from PIL import Image
 from src.datasets.phase2char_dataset import Phase2CharDataset
-from src.draw_utils import put_stuffs_on_img
-from src.datasets.phase1line_dataset import Phase1LineDataset
-from src.models.phase1line_model import Phase1LineBackbone
+from src.datasets.phase2char_dataset import ALL_CHARS
 from torch import Tensor
-
-ALL_CHARS = "0123456789aábcdeéfghiíjklmnoóöőpqrstuúüűvwxyzAÁBCDEÉFGHIÍJKLMNOÓÖŐPQRSTUÚÜŰVWXYZ!#%()*+,-./:;<=>?[]_{|}~ "
 
 class CNNBackbone(nn.Module):
     def __init__(self):
@@ -21,63 +13,42 @@ class CNNBackbone(nn.Module):
         self.relu = nn.ReLU()
         self.avg_pool = nn.AvgPool2d(kernel_size=2, stride=2)
 
-        self.conv_1 = nn.Conv2d(3, 8, kernel_size=3, stride=1, padding="same", bias=True)
-        self.conv_2 = nn.Conv2d(8, 8, kernel_size=3, stride=1, padding="same", bias=True)
-
-        self.conv_3 = nn.Conv2d(8, 16, kernel_size=3, stride=1, padding="same", bias=True)
-        self.conv_4 = nn.Conv2d(16, 16, kernel_size=3, stride=1, padding="same", bias=True)
-
-        self.conv_5 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding="same", bias=True)
-        self.conv_6 = nn.Conv2d(32, 32, kernel_size=3, stride=1, padding="same", bias=True)
-
-        self.conv_7 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding="same", bias=True)
-        self.conv_8 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding="same", bias=True)
-
-        self.conv_9 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding="same", bias=True)
-        self.conv_10 = nn.Conv2d(128, 128, kernel_size=3, stride=1, padding="same", bias=True)
-
-        self.conv_final = nn.Conv2d(128, 128, kernel_size=8, padding="valid", bias=False)
+        self.conv_1 = nn.Conv2d(3, 8, kernel_size=5, stride=2, padding=2, bias=True)
+        self.conv_2 = nn.Conv2d(8, 16, kernel_size=3, stride=1, padding="same", bias=True)
+        self.conv_3 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding="same", bias=True)
+        self.conv_4 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding="same", bias=True)
+        self.conv_5 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding="same", bias=True)
+        self.conv_final = nn.Conv2d(128, 128, kernel_size=2, padding="valid", bias=False)
 
     def forward(self, x: Tensor) -> Tensor:
         bs = x.shape[0]
         assert Phase2CharDataset.IMG_SIZE == 128
         assert x.shape == (bs, 3, 128, 128)
 
-        x = x0 = self.conv_1(x) # 128x128x8
-        x = self.relu(x) # 128x128x8
-        x = self.conv_2(x) # 128x128x8
-        x = self.relu(x) # 128x128x8
-        x = x0 + x # 128x128x8
+        x = self.conv_1(x) # 64x64 channels: 8
 
-        x = self.avg_pool(x) # 64x64x8
-        x = x0 = self.conv_3(x) # 64x64x16
-        x = self.relu(x) # 64x64x16
-        x = self.conv_4(x) # 64x64x16
-        x = self.relu(x) # 64x64x16
-        x = x0 + x # 64x64x16
+        x = self.avg_pool(x) # 32x32 channels: 8
+        x = x0 = self.conv_2(x) # 32x32 channels: 16
+        x = self.relu(x) # 32x32 channels: 16
+        x = x0 + x # 32x32 channels: 16
 
-        x = self.avg_pool(x) # 32x32x16
-        x = x0 = self.conv_5(x) # 32x32x32
-        x = self.relu(x) # 32x32x32
-        x = self.conv_6(x) # 32x32x32
-        x = self.relu(x) # 32x32x32
-        x = x0 + x # 32x32x32
+        x = self.avg_pool(x) # 16x16 channels: 16
+        x = x0 = self.conv_3(x) # 16x16 channels: 32
+        x = self.relu(x) # 16x16 channels: 32
+        x = x0 + x # 16x16 channels: 32
 
-        x = self.avg_pool(x) # 16x16x32
-        x = x0 = self.conv_7(x) # 16x16x64
-        x = self.relu(x) # 16x16x64
-        x = self.conv_8(x) # 16x16x64
-        x = self.relu(x) # 16x16x64
-        x = x0 + x # 16x16x64
+        x = self.avg_pool(x) # 8x8 channels: 32
+        x = x0 = self.conv_4(x) # 8x8 channels: 64
+        x = self.relu(x) # 8x8 channels: 64
+        x = x0 + x # 8x8 channels: 64
 
-        x = self.avg_pool(x) # 8x8x64
-        x = x0 = self.conv_9(x) # 8x8x128
-        x = self.relu(x) # 8x8x128
-        x = self.conv_10(x) # 8x8x128
-        x = self.relu(x) # 8x8x128
-        x = x0 + x # 8x8x128
+        x = self.avg_pool(x) # 4x4 channels: 64
+        x = x0 = self.conv_5(x) # 4x4 channels: 128
+        x = self.relu(x) # 4x4 channels: 128
+        x = x0 + x # 4x4 channels: 128
 
-        x = self.conv_final(x) # 1x1x128
+        x = self.avg_pool(x) # 2x2 channels: 128
+        x = self.conv_final(x) # 1x1 channels: 128
 
         return x
 
@@ -196,17 +167,9 @@ class CNNModulePhase2Chars(pl.LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=2e-4, weight_decay=1e-5)
         return optimizer
 
-    def _loss(self, batch: Dict[str, Tensor], chars_logits: Tensor, char_width: Tensor, name: str, factor: float=1.0):
-        gt_chars = [chr(x.item()) for x in batch["label"].flatten()]
-        target_indices = []
-        for c in gt_chars:
-            if c in ALL_CHARS:
-                target_indices.append(ALL_CHARS.index(c))
-            else:
-                target_indices.append(len(ALL_CHARS))
-        target_indices = torch.tensor(target_indices, dtype=torch.long, device=chars_logits.device)
+    def _loss(self, batch: Dict[str, Tensor], chars_logits: Tensor, char_width: Tensor, name: str):
 
-        char_loss = self.ce(chars_logits, target_indices)
+        char_loss = self.ce(chars_logits, batch["label_idx"].flatten())
 
         char_width_gt = batch["char_width"].flatten()
         is_double_space_gt = batch["is_double_space"].flatten()
@@ -216,16 +179,16 @@ class CNNModulePhase2Chars(pl.LightningModule):
 
         loss = char_loss + loss_width
 
-        self.log(name, factor*loss, prog_bar=True)
+        self.log(name, loss, prog_bar=True)
 
         return loss
 
     def training_step(self, batch, batch_idx):
         chars_logits, char_width = self.forward(batch)
 
-        return self._loss(batch, chars_logits, char_width, "train_loss", factor=1e5)
+        return self._loss(batch, chars_logits, char_width, "train_loss")
 
     def validation_step(self, batch, batch_idx):
         chars_logits, char_width = self.forward(batch)
 
-        return self._loss(batch, chars_logits, char_width, "val_loss", factor=1e5)
+        return self._loss(batch, chars_logits, char_width, "val_loss")
