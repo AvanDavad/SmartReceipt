@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Dict, List
-from src.draw_utils import draw_text_on_image, draw_vertical_line, put_stuffs_on_img
+from src.draw_utils import draw_text_on_image, draw_vertical_line
 
 import numpy as np
 import torch
@@ -10,20 +10,6 @@ from torchvision import transforms
 from PIL import Image
 
 from src.readers.char_reader import CharReader
-
-def make_square_by_padding(img: Image.Image) -> Image.Image:
-    w, h = img.size
-    if w == h:
-        return img
-
-    if w > h:
-        img_new = Image.new(img.mode, (w, w), color=(255, 255, 255))
-        img_new.paste(img, (0, (w - h) // 2))
-    else:
-        img_new = Image.new(img.mode, (h, h), color=(255, 255, 255))
-        img_new.paste(img, ((h - w) // 2, 0))
-
-    return img_new
 
 
 class Phase2CharDataset(Dataset):
@@ -67,7 +53,7 @@ class Phase2CharDataset(Dataset):
                 else:
                     img_sidelen = int(x1 - x0)
 
-                y_offset = 0.0 if not self.augment else img_sidelen * np.random.uniform(-0.1, 0.1)
+                y_offset = 0.0 if not self.augment else img_sidelen * np.random.uniform(-0.2, 0.2)
 
                 x_left = int(x0)
                 y_top = int(y0 + (y1 - y0)/2 - img_sidelen/2 + y_offset)
@@ -117,6 +103,9 @@ class Phase2CharDataset(Dataset):
                 img = draw_text_on_image(img, text=f"<{label_chr}>", pos=(0,0))
                 char_width = sample_t["char_width"].item()
                 img = draw_vertical_line(img, int(img.width * char_width))
+                is_double_space = sample_t["is_double_space"].item()
+                if is_double_space:
+                    img = draw_text_on_image(img, text="d.s.", pos=(0, img.height // 2))
 
             images.append(img)
 

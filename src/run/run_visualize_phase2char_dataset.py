@@ -6,6 +6,7 @@ import argparse
 from pathlib import Path
 from src.datasets.phase1line_dataset import Phase1LineDataset
 from src.datasets.phase2char_dataset import Phase2CharDataset
+from src.readers.char_reader import CharReader
 from src.readers.image_reader import ImageReader
 import sys
 
@@ -18,15 +19,20 @@ if __name__ == "__main__":
     )
     parser.add_argument("--split", type=str, default="train")
     parser.add_argument("--augment", action="store_true")
+    parser.add_argument("--shuffle", action="store_true")
     parser.add_argument("--repeat", type=int, default=1)
     parser.add_argument("--max_num_chars", type=int, default=50)
+    parser.add_argument("--w", type=int, default=5)
     parser.add_argument("--out_folder", type=str, default="visualization/phase2char_dataset")
     args = parser.parse_args()
 
-    rootdir = Path(args.rootdir) / args.split
+    rootdir: Path = Path(args.rootdir) / args.split
+    image_reader = ImageReader(rootdir)
+    char_reader = CharReader(image_reader, w=args.w)
     dataset = Phase2CharDataset(
-        ImageReader(rootdir),
+        char_reader,
         augment=args.augment,
+        shuffle=args.shuffle,
     )
 
     out_folder: Path = Path(args.out_folder) / args.split
@@ -37,7 +43,7 @@ if __name__ == "__main__":
     num_chars = 0
     for idx in range(len(dataset)):
         for repeat_idx in range(args.repeat):
-            dataset.show(idx, out_folder, repeat_idx)
+            dataset.show(idx, out_folder, repeat_idx, verbose=True)
             num_chars += 1
             if num_chars >= args.max_num_chars:
                 sys.exit(0)
