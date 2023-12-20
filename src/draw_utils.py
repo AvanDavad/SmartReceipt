@@ -135,3 +135,21 @@ def save_img_with_texts(img, kps, filename, margin=5):
 
     img.save(filename)
     print(f"saved {filename}")
+
+def draw_for_char_recognition(img: Image.Image, offset_list: List[int], char_list: List[str], confidence_list: List[float]) -> Image.Image:
+    image_magnify_factor = 20
+    img = img.copy()
+    img = img.resize((img.width * image_magnify_factor, img.height * image_magnify_factor))
+    draw = ImageDraw.Draw(img)
+    assert len(offset_list) == len(char_list) == len(confidence_list)
+
+    for idx in range(len(offset_list)):
+        line_offset = offset_list[idx] * image_magnify_factor
+        char = char_list[idx]
+        confidence = confidence_list[idx]
+        draw.line((line_offset, 0, line_offset, img.height), fill="red", width=2)
+
+        text_offset = 0 if idx == 0 else offset_list[idx-1] * image_magnify_factor
+        draw.text((text_offset, 0), f"<{char}>", fill="red", font=ImageFont.truetype("arial.ttf", 80))
+        draw.text((text_offset, img.height // 2), f"{confidence:.2f}", fill="red", font=ImageFont.truetype("arial.ttf", 80))
+    return img

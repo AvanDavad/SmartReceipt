@@ -1,10 +1,14 @@
-from typing import Dict, Tuple
+from pathlib import Path
+from typing import Dict, Optional, Tuple
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 from src.datasets.phase2char_dataset import Phase2CharDataset
 from src.datasets.phase2char_dataset import ALL_CHARS
 from torch import Tensor
+from PIL import Image
+
+from src.draw_utils import draw_for_char_recognition
 
 class CNNBackbone(nn.Module):
     def __init__(self):
@@ -192,3 +196,70 @@ class CNNModulePhase2Chars(pl.LightningModule):
         chars_logits, char_width = self.forward(batch)
 
         return self._loss(batch, chars_logits, char_width, "val_loss")
+
+    def inference(self, line_image: Image.Image, out_folder: Optional[Path] = None, prefix: str="", w: int = 5, verbose: bool = False) -> str:
+        feature_list = []
+        tiny_feature_list = []
+        x_offset_list = []
+        x_offset = 0.0
+        while x_offset < line_image.width:
+            img = line_image.crop((x_offset, 0, x_offset + line_image.height, line_image.height))
+            input_img: Tensor = Phase2CharDataset.TRANSFORMS(img)
+            image_feature: Tensor = self.cnn_backbone(input_img.unsqueeze(0))
+            feature_list.append(image_feature.flatten())
+            char_width_relative = self.fcn_for_char_width(image_feature[:, :, 0, 0]).item()
+            char_width = max(int(char_width_relative * line_image.height), 1)
+            x_offset += char_width
+            x_offset_list.append(x_offset)
+
+            tiny_feature: Tensor = self.image_feature_reduce(image_feature[:, :, 0, 0])
+            tiny_feature_list.append(tiny_feature.flatten())
+
+        black_image = Image.new("RGB", (line_image.height, line_image.height), color=(0, 0, 0))
+        black_feature = self.cnn_backbone(Phase2CharDataset.TRANSFORMS(black_image).unsqueeze(0))
+        tiny_black_feature = self.image_feature_reduce(black_feature[:, :, 0, 0]).flatten()
+
+        char_list = []
+        confidence_list = []
+        for idx in range(len(feature_list)):
+            tiny_pre_features = []
+            num_black_features = max(0, w - idx)
+            num_not_black_features = w - num_black_features
+            for _ in range(num_black_features):
+                tiny_pre_features.append(tiny_black_feature)
+            for jj in range(num_not_black_features):
+                tiny_pre_features.append(tiny_feature_list[idx - num_not_black_features + jj])
+
+            tiny_post_features = []
+            num_black_features = max(0, w - (len(feature_list) - idx - 1))
+            num_not_black_features = w - num_black_features
+            for jj in range(num_not_black_features):
+                tiny_post_features.append(tiny_feature_list[idx + 1 + jj])
+            for _ in range(num_black_features):
+                tiny_post_features.append(tiny_black_feature)
+
+            all_features = torch.cat(tiny_pre_features + [feature_list[idx]] + tiny_post_features, dim=0).unsqueeze(0)
+            chars_logits = self.last_fcn(all_features)
+            char_idx = torch.argmax(chars_logits).item()
+            char = ALL_CHARS[char_idx]
+            char_list.append(char)
+            probabilities = torch.softmax(chars_logits, dim=1).flatten()
+            confidence = probabilities[char_idx].item()
+            confidence_list.append(confidence)
+
+        line_text = "".join(char_list)
+
+        if out_folder is not None:
+            filename = out_folder / f"{prefix}_line.jpg"
+
+            img_line = draw_for_char_recognition(
+                img=line_image,
+                offset_list=x_offset_list,
+                char_list=char_list,
+                confidence_list=confidence_list,
+            )
+            img_line.save(filename)
+            if verbose:
+                print(f"Saved {filename}")
+
+        return line_text
