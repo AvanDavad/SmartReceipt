@@ -38,28 +38,28 @@ class CharSample:
         return self_msg
 
 class CharReader:
-    def __init__(self, image_reader: ImageReader, w: int = 5):
-        self.image_reader = image_reader
+    def __init__(self, root_dir: Path, w: int = 5):
+        self.root_dir = root_dir / "char_reader"
+        assert self.root_dir.is_dir()
+
         self._w = w
 
-        self.mapping = []
-        for i in range(len(self.image_reader)):
-            sample = self.image_reader[i]
-            if sample.phase_2_lines is None:
-                continue
+        self.filenames = sorted(self.root_dir.glob("*.jpg"))
+        self.images: List[Image.Image] = []
 
-            text = sample.phase_2_text
-            coords = sample.phase_2_lines
-            assert len(text) == len(coords) - 1
+        self.mapping: List[Tuple[int, float, float, str]] = []
+        for i, filename in enumerate(self.filenames):
+            image = Image.open(filename)
+            self.images.append(image)
 
-            line_width = sample.phase_1_image.width
-
-            num_chars = len(text)
-            for j in range(num_chars):
-                line_idx_start = int(np.floor(coords[j] / line_width))
-                line_idx_end = int(np.floor(coords[j+1] / line_width))
-                if line_idx_start == line_idx_end:
-                    self.mapping.append((i, j, line_idx_start))
+            json_filename = filename.with_suffix(".json")
+            assert json_filename.is_file()
+            with open(json_filename, "r") as f:
+                data = json.load(f)
+            line_coords = np.array(data["line_coords"])
+            line_text = data["line_text"]
+            for j, (x0, x1) in enumerate(zip(line_coords[:-1], line_coords[1:])):
+                self.mapping.append((i, x0, x1, line_text[j]))
 
     def __repr__(self):
         return f"CharReader(len={len(self)})"
@@ -71,26 +71,34 @@ class CharReader:
         assert idx < len(self)
         assert idx >= 0
 
-        i, j, line_idx = self.mapping[idx]
+        current_line_idx, x0, x1, char = self.mapping[idx]
 
-        i_sample = self.image_reader[i]
+        img = self.images[current_line_idx]
+        height_per_3 = img.height // 3
 
-        text = i_sample.phase_2_text
-        coords = i_sample.phase_2_lines
+        this_char_is_space = char == " "
+        next_char_is_like_space = True
+        if idx + 1 < len(self):
+            line_idx, _, _, char_next = self.mapping[idx + 1]
+            if current_line_idx == line_idx and char_next != " ":
+                next_char_is_like_space = False
+        is_double_space = this_char_is_space and next_char_is_like_space
 
-        img = i_sample.phase_1_image
-        lines_y = i_sample.phase_1_lines
+        current_patch = PatchSample(
+            crop_xyxy=(x0, height_per_3, x1, 2*height_per_3),
+            label=char,
+            is_double_space=is_double_space,
+        )
 
         pre_patches: List[PatchSample] = []
         for jj in range(self._w):
             if idx - jj - 1 >= 0:
-                pre_i, pre_j, pre_line_idx = self.mapping[idx - jj - 1]
-                if i == pre_i and line_idx == pre_line_idx:
-                    x0_pre = np.remainder(coords[pre_j], img.width)
-                    x1_pre = x0_pre + coords[pre_j+1] - coords[pre_j]
+                line_idx, x0_pre, x1_pre, char = self.mapping[idx - jj - 1]
+
+                if current_line_idx == line_idx:
                     patch = PatchSample(
-                        crop_xyxy=(x0_pre, lines_y[line_idx], x1_pre, lines_y[line_idx+1]),
-                        label=text[pre_j],
+                        crop_xyxy=(x0_pre, height_per_3, x1_pre, 2*height_per_3),
+                        label=char,
                     )
                 else:
                     patch = PatchSample()
@@ -102,13 +110,12 @@ class CharReader:
         post_patches: List[PatchSample] = []
         for jj in range(self._w):
             if idx + jj + 1 < len(self):
-                post_i, post_j, post_line_idx = self.mapping[idx + jj + 1]
-                if i == post_i and line_idx == post_line_idx:
-                    x0_post = np.remainder(coords[post_j], img.width)
-                    x1_post = x0_post + coords[post_j+1] - coords[post_j]
+                line_idx, x0_post, x1_post, char = self.mapping[idx + jj + 1]
+
+                if current_line_idx == line_idx:
                     patch = PatchSample(
-                        crop_xyxy=(x0_post, lines_y[line_idx], x1_post, lines_y[line_idx+1]),
-                        label=text[post_j],
+                        crop_xyxy=(x0_post, height_per_3, x1_post, 2*height_per_3),
+                        label=char,
                     )
                 else:
                     patch = PatchSample()
@@ -117,20 +124,10 @@ class CharReader:
             post_patches.append(patch)
         assert len(post_patches) == self._w
 
-        x0 = np.remainder(coords[j], img.width)
-        x1 = x0 + coords[j+1] - coords[j]
-        is_double_space = (text[j] == " " and post_patches[0].label == " ") or post_patches[0].label is None
-
-        patch = PatchSample(
-            crop_xyxy=(x0, lines_y[line_idx], x1, lines_y[line_idx+1]),
-            label=text[j],
-            is_double_space=is_double_space,
-        )
-
         sample = CharSample(
-            image=i_sample.phase_1_image,
+            image=self.images[current_line_idx],
             pre_patches=pre_patches,
-            patch=patch,
+            patch=current_patch,
             post_patches=post_patches,
         )
 
@@ -173,20 +170,17 @@ class CharReader:
                         (x0+x1)/2,
                         (y0+y1)/2,
                         patch.label,
-                        fontsize=28,
+                        fontsize=14,
                         color=color,
                         horizontalalignment="center",
                         verticalalignment="center",
                     )
                 if patch.is_double_space:
-                    ax.plot([x0, x1-1.0], [y0 + 0.1 * (y1-y0), y0 + 0.1 * (y1-y0)], c=color, linewidth=2)
+                    ax.plot([x0, x1-1.0], [y0 + 0.1 * (y1-y0), y0 + 0.1 * (y1-y0)], c=color, linewidth=1)
         x0 = crop_xyxy[:, 0].min()
         y0 = crop_xyxy[:, 1].min()
         x1 = crop_xyxy[:, 2].max()
         y1 = crop_xyxy[:, 3].max()
-
-        ax.set_xlim(x0 - (x1-x0) * 0.5, x1 + (x1-x0) * 0.5)
-        ax.set_ylim(y1 + (y1-y0) * 0.5, y0 - (y1-y0) * 0.5)
 
         ax.set_xticks([])
         ax.set_yticks([])

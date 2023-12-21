@@ -14,6 +14,7 @@ from src.readers.char_reader import CharReader
 
 ALL_CHARS = "0123456789aábcdeéfghiíjklmnoóöőpqrstuúüűvwxyzAÁBCDEÉFGHIÍJKLMNOÓÖŐPQRSTUÚÜŰVWXYZ!#%()*+,-./:;<=>?[]_{|}~ "
 
+
 class Phase2CharDataset(Dataset):
     MEAN = [0.5, 0.5, 0.5]
     STD = [0.2, 0.2, 0.2]
@@ -26,7 +27,9 @@ class Phase2CharDataset(Dataset):
         ]
     )
 
-    def __init__(self, reader: CharReader, augment: bool = False, shuffle: bool = False):
+    def __init__(
+        self, reader: CharReader, augment: bool = False, shuffle: bool = False
+    ):
         assert isinstance(reader, CharReader)
         self.reader = reader
         self.augment = augment
@@ -55,10 +58,14 @@ class Phase2CharDataset(Dataset):
                 else:
                     img_sidelen = int(x1 - x0)
 
-                y_offset = 0.0 if not self.augment else img_sidelen * np.random.uniform(-0.2, 0.2)
+                y_offset = (
+                    0.0
+                    if not self.augment
+                    else img_sidelen * np.random.uniform(-0.2, 0.2)
+                )
 
                 x_left = int(x0)
-                y_top = int(y0 + (y1 - y0)/2 - img_sidelen/2 + y_offset)
+                y_top = int(y0 + (y1 - y0) / 2 - img_sidelen / 2 + y_offset)
                 x_right = int(x_left + img_sidelen)
                 y_bottom = int(y_top + img_sidelen)
 
@@ -71,9 +78,7 @@ class Phase2CharDataset(Dataset):
                     (Phase2CharDataset.IMG_SIZE, Phase2CharDataset.IMG_SIZE),
                     color=(0, 0, 0),
                 )
-            img_patches.append(
-                Phase2CharDataset.TRANSFORMS(img_patch)
-            )
+            img_patches.append(Phase2CharDataset.TRANSFORMS(img_patch))
 
         if sample.patch.label in ALL_CHARS:
             target = ALL_CHARS.index(sample.patch.label)
@@ -81,10 +86,10 @@ class Phase2CharDataset(Dataset):
             target = len(ALL_CHARS)
 
         sample_t = {
-            "img":torch.stack(img_patches, dim=0),
-            "label_ascii":torch.tensor([ord(sample.patch.label)]),
-            "label_idx":torch.tensor([target]),
-            "is_double_space":torch.tensor([sample.patch.is_double_space]),
+            "img": torch.stack(img_patches, dim=0),
+            "label_ascii": torch.tensor([ord(sample.patch.label)]),
+            "label_idx": torch.tensor([target]),
+            "is_double_space": torch.tensor([sample.patch.is_double_space]),
             "char_width": torch.tensor([char_width]),
         }
 
@@ -100,15 +105,17 @@ class Phase2CharDataset(Dataset):
         img_pil = Image.fromarray(img)
         return img_pil
 
-    def show(self, idx: int, out_folder: Path, repeat_idx: int=0, verbose: bool = False):
+    def show(
+        self, idx: int, out_folder: Path, repeat_idx: int = 0, verbose: bool = False
+    ):
         sample_t = self[idx]
 
         images: List[Image.Image] = []
         for img_idx, img_tensor in enumerate(sample_t["img"]):
             img = Phase2CharDataset.img_from_tensor(img_tensor)
-            if img_idx == self.reader._w:
+            if img_idx == self.reader.window_size:
                 label_chr = chr(sample_t["label"].item())
-                img = draw_text_on_image(img, text=f"<{label_chr}>", pos=(0,0))
+                img = draw_text_on_image(img, text=f"<{label_chr}>", pos=(0, 0))
                 char_width = sample_t["char_width"].item()
                 img = draw_vertical_line(img, int(img.width * char_width))
                 is_double_space = sample_t["is_double_space"].item()
@@ -118,12 +125,14 @@ class Phase2CharDataset(Dataset):
             images.append(img)
 
         pad_size = 10
-        new_height = self.IMG_SIZE + 2*pad_size
+        new_height = self.IMG_SIZE + 2 * pad_size
         new_width = (self.IMG_SIZE + pad_size) * len(images) + pad_size
         img_big = Image.new("RGB", (new_width, new_height), color=(255, 255, 255))
 
         for img_idx, img in enumerate(images):
-            img_big.paste(img, (pad_size + img_idx*(self.IMG_SIZE + pad_size), pad_size))
+            img_big.paste(
+                img, (pad_size + img_idx * (self.IMG_SIZE + pad_size), pad_size)
+            )
 
         filename = out_folder / f"sample_{idx}_{repeat_idx}.jpg"
 
