@@ -50,7 +50,7 @@ class CharReader:
         self.mapping: List[Tuple[int, float, float, str]] = []
         for i, filename in enumerate(self.filenames):
             image = Image.open(filename)
-            self.images.append(image)
+            self.images.append(image.copy())
 
             json_filename = filename.with_suffix(".json")
             assert json_filename.is_file()

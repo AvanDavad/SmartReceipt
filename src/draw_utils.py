@@ -136,6 +136,18 @@ def save_img_with_texts(img, kps, filename, margin=5):
     img.save(filename)
     print(f"saved {filename}")
 
+def draw_borders(img: Image.Image, offset_list: List[int]) -> Image.Image:
+    image_magnify_factor = 5
+    img = img.copy()
+    img = img.resize((img.width * image_magnify_factor, img.height * image_magnify_factor))
+    draw = ImageDraw.Draw(img)
+
+    for x in offset_list[1:]:
+        line_offset = x * image_magnify_factor
+        draw.line((line_offset, 0, line_offset, img.height), fill="red", width=1)
+
+    return img
+
 def draw_for_char_recognition(img: Image.Image, offset_list: List[int], char_list: List[str], confidence_list: List[float]) -> Image.Image:
     image_magnify_factor = 20
     img = img.copy()
