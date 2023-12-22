@@ -20,6 +20,7 @@ PROJ_DIR = Path(__file__).parent.parent.parent
 
 def main(args):
     ckpt_path = get_best_ckpt_path(PROJ_DIR / "model_checkpoints" / "CNNModulePhase2CharsBorder")
+    # ckpt_path = ckpt_path.parents[2] / f"version_8" / "checkpoints" / "charbordermodel-epoch=07-val_loss=0.27174.ckpt"
     print(f"Loading model from {ckpt_path}")
     model = CNNModulePhase2CharsBorder().load_from_checkpoint(ckpt_path)
 

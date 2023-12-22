@@ -23,6 +23,9 @@ def main(args):
     train_dataset = Phase2CharBorderDataset(char_reader_tr, augment=True, shuffle=True)
     val_dataset = Phase2CharBorderDataset(char_reader_val, augment=False, shuffle=False)
 
+    print(f"train dataset size: {len(train_dataset)}")
+    print(f"val dataset size: {len(val_dataset)}")
+
     train_dataloader = DataLoader(
         train_dataset, batch_size=args.batch_size, num_workers=4
     )
@@ -30,6 +33,7 @@ def main(args):
 
     if args.from_scratch:
         model = CNNModulePhase2CharsBorder()
+        print("model initialized from scratch")
     else:
         version_num = args.version_num
         ckpt_name = args.ckpt_name
@@ -42,6 +46,9 @@ def main(args):
             / f"{ckpt_name}.ckpt"
         )
         model = CNNModulePhase2CharsBorder().load_from_checkpoint(ckpt_path)
+        print(f"model initialized from {ckpt_path}")
+    model.lr = args.lr
+    model.weight_decay = args.weight_decay
 
     checkpoint_callback = ModelCheckpoint(
         monitor="val_loss",
@@ -61,7 +68,7 @@ def main(args):
     trainer.validate(model, val_dataloader)
 
     print("starting training...")
-    time.sleep(5)
+    time.sleep(10.0)
 
     trainer.fit(
         model,
@@ -94,6 +101,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--max_epochs", type=int, default=1000)
+    parser.add_argument("--lr", type=float, default=1e-4)
+    parser.add_argument("--weight_decay", type=float, default=1e-5)
 
     args = parser.parse_args()
 

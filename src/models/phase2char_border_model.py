@@ -58,6 +58,9 @@ class CNNModulePhase2CharsBorder(pl.LightningModule):
 
         self.fcn = nn.Linear(32, 1)
 
+        self.lr = 1e-3
+        self.weight_decay = 1e-5
+
     def forward(self, batch: Dict[str, Tensor]) -> Tuple[torch.Tensor, torch.Tensor]:
         images = batch["img"]
         image_features = self.cnn_backbone(images)
@@ -67,7 +70,7 @@ class CNNModulePhase2CharsBorder(pl.LightningModule):
         return char_end_x
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=2e-4, weight_decay=1e-5)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr, weight_decay=self.weight_decay)
         return optimizer
 
     def _loss(self, batch: Dict[str, Tensor], char_end_x: Tensor, name: str):

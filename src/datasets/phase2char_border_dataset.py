@@ -53,19 +53,11 @@ class Phase2CharBorderDataset(Dataset):
         x_left = x0
         y_top = y0 + (y1 - y0) / 2 - img_crop_size / 2
         if self.augment:
-            x_left += np.random.uniform(0.0, (x1-x0)/2)
+            x_left += np.random.uniform(0.0, 0.75*(x1-x0))
             y_top += np.random.uniform(-0.1, 0.1) * (y1-y0)
 
         img_crop = sample.image.crop((int(x_left), int(y_top), int(x_left) + img_crop_size, int(y_top) + img_crop_size))
         assert img_crop.width == img_crop.height
-
-        if self.augment and np.random.rand() < 0.3:
-            i0 = np.random.randint(0, img_crop.height)
-            i1 = np.random.randint(i0, min(img_crop.height, i0 + img_crop.height // 2))
-
-            img_crop = np.array(img_crop)
-            img_crop[i0:i1] = 0
-            img_crop = Image.fromarray(img_crop)
 
         img_tensor = Phase2CharBorderDataset.TRANSFORMS(img_crop)
 
