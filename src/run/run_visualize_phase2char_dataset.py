@@ -27,8 +27,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     rootdir: Path = Path(args.rootdir) / args.split
-    image_reader = ImageReader(rootdir)
-    char_reader = CharReader(image_reader, w=args.w)
+    char_reader = CharReader(rootdir, w=args.w)
     dataset = Phase2CharDataset(
         char_reader,
         augment=args.augment,
