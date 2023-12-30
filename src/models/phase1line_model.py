@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -168,10 +168,10 @@ class CNNModulePhase1Line(pl.LightningModule):
 
         return line_y, is_last, is_last_prob
 
-    def inference(self, img: Image.Image, out_folder:Optional[Path]=None, prefix="2_lines", max_num_lines=50):
+    def inference(self, img: Image.Image, out_folder:Optional[Path]=None, prefix="2_lines", max_num_lines=50) -> List[Image.Image]:
         self.eval()
         is_last = False
-        line_img_list = []
+        line_img_list: List[Image.Image] = []
         offset_y = 0
         offset_y_list = []
         idx = 0
@@ -211,3 +211,5 @@ class CNNModulePhase1Line(pl.LightningModule):
                 filename = out_folder / f"{prefix}_{str(idx).zfill(3)}.jpg"
                 line_img.save(filename)
                 print(f"Saved {filename}")
+
+        return line_img_list

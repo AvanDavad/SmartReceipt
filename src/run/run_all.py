@@ -1,12 +1,13 @@
 import argparse
 
 from src.camera_calib import get_camera_calib
-from src.draw_utils import save_img_with_kps
+from src.draw_utils import draw_borders, save_img_with_kps
 from pathlib import Path
 from PIL import Image
 import numpy as np
 from src.models.phase0points_model import CNNModulePhase0Points
 from src.models.phase1line_model import CNNModulePhase1Line
+from src.models.phase2char_border_model import CNNModulePhase2CharsBorder
 from src.models.phase2char_models import CNNModulePhase2Chars
 from src.warp_perspective import warp_perspective_with_nonlin_least_squares
 
@@ -20,13 +21,16 @@ def get_val_loss_from_ckpt_path(ckpt_path):
         val_loss = np.inf
     return val_loss
 
-def get_best_ckpt_path(checkpoint_dir):
+def get_best_ckpt_path(checkpoint_dir, version: int = -1):
     ckpt_path = checkpoint_dir / "lightning_logs"
 
     best_ckpt_path = None
     best_val_loss = np.inf
 
     for version_dir in ckpt_path.iterdir():
+        if version != -1 and version != int(version_dir.stem.split("_")[-1]):
+            continue
+
         checkpoints_dir = version_dir / "checkpoints"
         for ckpt_file in checkpoints_dir.iterdir():
             val_loss = get_val_loss_from_ckpt_path(ckpt_file)
@@ -37,7 +41,7 @@ def get_best_ckpt_path(checkpoint_dir):
     return best_ckpt_path
 
 def main(args):
-    out_folder: Path = PROJ_DIR / args.out_folder
+    out_folder: Path = PROJ_DIR / args.out_folder / "run_all"
     out_folder.mkdir(exist_ok=True, parents=True)
     for file in out_folder.iterdir():
         file.unlink()
@@ -67,23 +71,20 @@ def main(args):
 
     ckpt_path = get_best_ckpt_path(PROJ_DIR / "model_checkpoints" / "CNNModulePhase1Line")
     model_1 = CNNModulePhase1Line().load_from_checkpoint(ckpt_path)
-    model_1.inference(img, out_folder, prefix="2_lines")
+    line_image_list = model_1.inference(img, out_folder, prefix="2_lines")
 
-    # detecting chars
+    # detecting char borders
+    
+    ckpt_path = get_best_ckpt_path(PROJ_DIR / "model_checkpoints" / "CNNModulePhase2CharsBorder")
+    model_border = CNNModulePhase2CharsBorder().load_from_checkpoint(ckpt_path)
+    for line_idx, line_img in enumerate(line_image_list):
+        x_coords = model_border.inference(line_img)
 
-    ckpt_path = get_best_ckpt_path(PROJ_DIR / "model_checkpoints" / "CNNModulePhase2Chars")
-    model_2 = CNNModulePhase2Chars().load_from_checkpoint(ckpt_path)
-    line_texts = []
-    for filename in out_folder.glob("2_lines*.jpg"):
-        if filename.stem == "2_lines_all":
-            continue
+        img = draw_borders(line_img, x_coords)
 
-        line_image = Image.open(filename)
-        line_text = model_2.inference(line_image, out_folder, prefix=f"3_chars_{filename.stem[-3:]}")
-        line_texts.append(line_text)
-
-    with open(out_folder / "text.txt", "w") as f:
-        f.write("\n".join(line_texts))
+        filename = str(out_folder / f"line_borders_{line_idx}.jpg")
+        img.save(filename)
+        print(f"Saved {filename}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("run inference")

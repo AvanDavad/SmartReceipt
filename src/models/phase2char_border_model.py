@@ -78,7 +78,7 @@ class CNNModulePhase2CharsBorder(pl.LightningModule):
         gt_char_end_x = batch["char_end_x"]
 
         loss = (char_end_x - gt_char_end_x) ** 2 + 10.0 * torch.abs(char_end_x - gt_char_end_x)
-        weight = torch.where(batch["is_double_space"], 1e-3, 1.0)
+        weight = torch.where(batch["is_double_space"], 1e-6, 1.0)
         weighted_loss = loss * weight
 
         mean_loss = torch.mean(weighted_loss)

@@ -19,8 +19,7 @@ from src.run.run_all import get_best_ckpt_path
 PROJ_DIR = Path(__file__).parent.parent.parent
 
 def main(args):
-    ckpt_path = get_best_ckpt_path(PROJ_DIR / "model_checkpoints" / "CNNModulePhase2CharsBorder")
-    # ckpt_path = ckpt_path.parents[2] / f"version_8" / "checkpoints" / "charbordermodel-epoch=07-val_loss=0.27174.ckpt"
+    ckpt_path = get_best_ckpt_path(PROJ_DIR / "model_checkpoints" / "CNNModulePhase2CharsBorder", version=args.version)
     print(f"Loading model from {ckpt_path}")
     model = CNNModulePhase2CharsBorder().load_from_checkpoint(ckpt_path)
 
@@ -42,6 +41,7 @@ def main(args):
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
+    argparser.add_argument("--version", type=int, default=-1)
     argparser.add_argument("--top", type=float, default=0.0)
     argparser.add_argument("--bottom", type=float, default=1.0)
 

@@ -53,7 +53,7 @@ class Phase2CharBorderDataset(Dataset):
         x_left = x0
         y_top = y0 + (y1 - y0) / 2 - img_crop_size / 2
         if self.augment:
-            x_left += np.random.uniform(0.0, 0.75*(x1-x0))
+            x_left += np.random.uniform(-0.1*(x1-x0), 0.1*(x1-x0))
             y_top += np.random.uniform(-0.1, 0.1) * (y1-y0)
 
         img_crop = sample.image.crop((int(x_left), int(y_top), int(x_left) + img_crop_size, int(y_top) + img_crop_size))
