@@ -1,12 +1,13 @@
 import argparse
 
 from src.camera_calib import get_camera_calib
-from src.draw_utils import draw_borders, save_img_with_kps
+from src.draw_utils import draw_borders, draw_borders_with_chars_and_probs, save_img_with_kps
 from pathlib import Path
 from PIL import Image
 import numpy as np
 from src.models.phase0points_model import CNNModulePhase0Points
 from src.models.phase1line_model import CNNModulePhase1Line
+from src.models.phase2_single_char_model import CNNModulePhase2SingleChar
 from src.models.phase2char_border_model import CNNModulePhase2CharsBorder
 from src.models.phase2char_models import CNNModulePhase2Chars
 from src.warp_perspective import warp_perspective_with_nonlin_least_squares
@@ -73,10 +74,15 @@ def main(args):
     model_1 = CNNModulePhase1Line().load_from_checkpoint(ckpt_path)
     line_image_list = model_1.inference(img, out_folder, prefix="2_lines")
 
-    # detecting char borders
+    # reading lines
     
     ckpt_path = get_best_ckpt_path(PROJ_DIR / "model_checkpoints" / "CNNModulePhase2CharsBorder")
     model_border = CNNModulePhase2CharsBorder().load_from_checkpoint(ckpt_path)
+
+    ckpt_path = get_best_ckpt_path(PROJ_DIR / "model_checkpoints" / "CNNModulePhase2SingleChar")
+    model_char = CNNModulePhase2SingleChar().load_from_checkpoint(ckpt_path)
+
+    line_text_list = []
     for line_idx, line_img in enumerate(line_image_list):
         x_coords = model_border.inference(line_img)
 
@@ -85,6 +91,26 @@ def main(args):
         filename = str(out_folder / f"line_borders_{line_idx}.jpg")
         img.save(filename)
         print(f"Saved {filename}")
+
+        line_chars = []
+        probs = []
+        for char_i in range(len(x_coords) - 1):
+            char_img = line_img.crop((x_coords[char_i], 0, x_coords[char_i + 1], line_img.height))
+            pred_char, prob = model_char.inference(char_img)
+            line_chars.append(pred_char)
+            probs.append(prob)
+        line_text = "".join(line_chars)
+
+        img_with_chars = draw_borders_with_chars_and_probs(line_img, x_coords[1:], line_chars, probs)
+
+        filename = str(out_folder / f"line_chars_{line_idx}.jpg")
+        img_with_chars.save(filename)
+        print(f"Saved {filename}")
+
+        line_text_list.append(line_text)
+
+    with open(out_folder / "infered_text.txt", "w") as f:
+        f.write("\n".join(line_text_list))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("run inference")
