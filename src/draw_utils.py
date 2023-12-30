@@ -148,6 +148,26 @@ def draw_borders(img: Image.Image, offset_list: List[int]) -> Image.Image:
 
     return img
 
+
+def draw_borders_with_chars_and_probs(img: Image.Image, offset_list: List[int], chars: str, probs: List[float]) -> Image.Image:
+    assert len(offset_list) == len(chars)
+    assert len(offset_list) == len(probs)
+
+    image_magnify_factor = 5
+    img = img.copy()
+    img = img.resize((img.width * image_magnify_factor, img.height * image_magnify_factor))
+    draw = ImageDraw.Draw(img)
+
+    for idx, (x0, x1) in enumerate(zip([0.0] + offset_list[:-1], offset_list)):
+        line_offset = x1 * image_magnify_factor
+        char_offset = x0 * image_magnify_factor
+        draw.line((line_offset, 0, line_offset, img.height), fill="red", width=1)
+        draw.text((char_offset, 0), f"<{chars[idx]}>", fill="black", font=ImageFont.truetype("arial.ttf", 40))
+        draw.text((char_offset, img.height // 2), f"{probs[idx]:.2f}", fill="black", font=ImageFont.truetype("arial.ttf", 40))
+
+    return img
+
+
 def draw_for_char_recognition(img: Image.Image, offset_list: List[int], char_list: List[str], confidence_list: List[float]) -> Image.Image:
     image_magnify_factor = 20
     img = img.copy()
