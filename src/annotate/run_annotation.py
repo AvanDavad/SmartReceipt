@@ -9,9 +9,14 @@ def main(args):
     _ = AnnotationGUI(root, args)
     root.mainloop()
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rootdir", type=str, default="/home/avandavad/projects/receipt_extractor/data")
+    parser.add_argument(
+        "--rootdir",
+        type=str,
+        default="/home/avandavad/projects/receipt_extractor/data",
+    )
     args = parser.parse_args()
 
     main(args)

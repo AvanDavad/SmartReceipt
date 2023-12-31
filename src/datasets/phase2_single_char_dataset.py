@@ -13,8 +13,6 @@ from PIL import Image
 from src.readers.char_reader import CharReader
 
 
-
-
 class Phase2SingleCharDataset(Dataset):
     MEAN = [0.5, 0.5, 0.5]
     STD = [0.2, 0.2, 0.2]
@@ -28,7 +26,10 @@ class Phase2SingleCharDataset(Dataset):
     )
 
     def __init__(
-        self, char_reader: CharReader, augment: bool = False, shuffle: bool = False
+        self,
+        char_reader: CharReader,
+        augment: bool = False,
+        shuffle: bool = False,
     ):
         assert isinstance(char_reader, CharReader)
         self.char_reader = char_reader
@@ -57,7 +58,9 @@ class Phase2SingleCharDataset(Dataset):
             img_sidelen = int(img_sidelen * np.random.uniform(0.8, 1.4))
 
         img_patch = sample.image.crop((x0, y0, x1, y1))
-        img_square = Image.new("RGB", (img_sidelen, img_sidelen), color=(255, 255, 255))
+        img_square = Image.new(
+            "RGB", (img_sidelen, img_sidelen), color=(255, 255, 255)
+        )
         x_left = int((img_sidelen - img_patch.width) / 2)
         y_top = int((img_sidelen - img_patch.height) / 2)
         if self.augment:
@@ -81,14 +84,19 @@ class Phase2SingleCharDataset(Dataset):
     def img_from_tensor(img_tensor: Tensor) -> Image.Image:
         img: np.ndarray = img_tensor.permute(1, 2, 0).numpy()
         img = (
-            img * np.array(Phase2SingleCharDataset.STD) + np.array(Phase2SingleCharDataset.MEAN)
+            img * np.array(Phase2SingleCharDataset.STD)
+            + np.array(Phase2SingleCharDataset.MEAN)
         ) * 255.0
         img = img.astype(np.uint8)
         img_pil = Image.fromarray(img)
         return img_pil
 
     def show(
-        self, idx: int, out_folder: Path, repeat_idx: int = 0, verbose: bool = False
+        self,
+        idx: int,
+        out_folder: Path,
+        repeat_idx: int = 0,
+        verbose: bool = False,
     ):
         sample_t = self[idx]
 

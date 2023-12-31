@@ -12,6 +12,7 @@ from typing import Dict
 from torch import Tensor
 from typing import Tuple
 
+
 class Phase0PointsDataset(Dataset):
     MEAN = [0.5, 0.5, 0.5]
     STD = [0.2, 0.2, 0.2]
@@ -64,10 +65,14 @@ class Phase0PointsDataset(Dataset):
         return sample_t
 
     @staticmethod
-    def color_augment(img: Image.Image, kps: Tensor) -> Tuple[Image.Image, Tensor]:
+    def color_augment(
+        img: Image.Image, kps: Tensor
+    ) -> Tuple[Image.Image, Tensor]:
         img = TF.adjust_brightness(img, 0.7 + np.random.rand() * 1.5)
         img = TF.adjust_contrast(img, 0.5 + np.random.rand() * 1.5)
-        img = TF.adjust_gamma(img, gamma=0.5 + np.random.rand(), gain = 0.5 + np.random.rand())
+        img = TF.adjust_gamma(
+            img, gamma=0.5 + np.random.rand(), gain=0.5 + np.random.rand()
+        )
         img = TF.adjust_hue(img, -0.5 + np.random.rand())
         img = TF.adjust_saturation(img, np.random.rand() * 1.5)
         return img, kps
@@ -92,7 +97,9 @@ class Phase0PointsDataset(Dataset):
         return img, kps
 
     @staticmethod
-    def perspective_augment(img: Image.Image, kps: Tensor) -> Tuple[Image.Image, Tensor]:
+    def perspective_augment(
+        img: Image.Image, kps: Tensor
+    ) -> Tuple[Image.Image, Tensor]:
         topleft = kps[0]
         topright = kps[1]
         bottomleft = kps[2]
@@ -105,15 +112,36 @@ class Phase0PointsDataset(Dataset):
             bottomleft.to(dtype=torch.int32).tolist(),
         ]
 
-        a = min([torch.linalg.norm(topleft - topright) * 0.1, torch.linalg.norm(topleft - bottomleft) * 0.1])
-        new_topleft = topleft + (-a + np.random.rand() * 2*a)
-        new_topleft = torch.clip(new_topleft, torch.tensor([0, 0]), torch.tensor([img.width, img.height]))
-        new_topright = topright + (-a + np.random.rand() * 2*a)
-        new_topright = torch.clip(new_topright, torch.tensor([0, 0]), torch.tensor([img.width, img.height]))
-        new_bottomleft = bottomleft + (-a + np.random.rand() * 2*a)
-        new_bottomleft = torch.clip(new_bottomleft, torch.tensor([0, 0]), torch.tensor([img.width, img.height]))
-        new_bottomright = bottomright + (-a + np.random.rand() * 2*a)
-        new_bottomright = torch.clip(new_bottomright, torch.tensor([0, 0]), torch.tensor([img.width, img.height]))
+        a = min(
+            [
+                torch.linalg.norm(topleft - topright) * 0.1,
+                torch.linalg.norm(topleft - bottomleft) * 0.1,
+            ]
+        )
+        new_topleft = topleft + (-a + np.random.rand() * 2 * a)
+        new_topleft = torch.clip(
+            new_topleft,
+            torch.tensor([0, 0]),
+            torch.tensor([img.width, img.height]),
+        )
+        new_topright = topright + (-a + np.random.rand() * 2 * a)
+        new_topright = torch.clip(
+            new_topright,
+            torch.tensor([0, 0]),
+            torch.tensor([img.width, img.height]),
+        )
+        new_bottomleft = bottomleft + (-a + np.random.rand() * 2 * a)
+        new_bottomleft = torch.clip(
+            new_bottomleft,
+            torch.tensor([0, 0]),
+            torch.tensor([img.width, img.height]),
+        )
+        new_bottomright = bottomright + (-a + np.random.rand() * 2 * a)
+        new_bottomright = torch.clip(
+            new_bottomright,
+            torch.tensor([0, 0]),
+            torch.tensor([img.width, img.height]),
+        )
 
         endpoints = [
             new_topleft.to(dtype=torch.int32).tolist(),
@@ -122,12 +150,16 @@ class Phase0PointsDataset(Dataset):
             new_bottomleft.to(dtype=torch.int32).tolist(),
         ]
         img = transforms.functional.perspective(img, startpoints, endpoints)
-        kps = torch.stack([new_topleft, new_topright, new_bottomleft, new_bottomright])
+        kps = torch.stack(
+            [new_topleft, new_topright, new_bottomleft, new_bottomright]
+        )
 
         return img, kps
 
     @staticmethod
-    def crop_augment(img: Image.Image, kps: Tensor) -> Tuple[Image.Image, Tensor]:
+    def crop_augment(
+        img: Image.Image, kps: Tensor
+    ) -> Tuple[Image.Image, Tensor]:
         kps_x0 = kps[:, 0].min().item()
         kps_x1 = kps[:, 0].max().item()
         kps_y0 = kps[:, 1].min().item()
@@ -152,13 +184,16 @@ class Phase0PointsDataset(Dataset):
     def img_from_tensor(img_tensor: Tensor) -> Image.Image:
         img: np.ndarray = img_tensor.permute(1, 2, 0).numpy()
         img = (
-            img * np.array(Phase0PointsDataset.STD) + np.array(Phase0PointsDataset.MEAN)
+            img * np.array(Phase0PointsDataset.STD)
+            + np.array(Phase0PointsDataset.MEAN)
         ) * 255
         img = img.astype(np.uint8)
         img = Image.fromarray(img)
         return img
 
-    def show(self, idx: int, out_folder: Path, repeat_idx=0, verbose: bool = False):
+    def show(
+        self, idx: int, out_folder: Path, repeat_idx=0, verbose: bool = False
+    ):
         sample_t = self[idx]
         img_tensor = sample_t["img"]
         kps_tensor = sample_t["kps"]

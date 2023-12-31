@@ -8,7 +8,9 @@ from pathlib import Path
 
 class TestImageReader(unittest.TestCase):
     def setUp(self):
-        rootdir = Path(__file__).parent.parent.parent.parent / "test_data" / "train"
+        rootdir = (
+            Path(__file__).parent.parent.parent.parent / "test_data" / "train"
+        )
         self.reader = ImageReader(rootdir)
 
     def test_reader_len(self):
@@ -26,5 +28,6 @@ class TestImageReader(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             self.reader.show(0, Path(tempdir))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

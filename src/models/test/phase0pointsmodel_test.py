@@ -6,6 +6,7 @@ from src.models.phase0points_model import CNNModulePhase0Points
 
 PROJ_DIR = Path(__file__).parent.parent.parent.parent
 
+
 class TestPhase0PointsModel(unittest.TestCase):
     def setUp(self):
         self.model = CNNModulePhase0Points()
@@ -17,5 +18,6 @@ class TestPhase0PointsModel(unittest.TestCase):
                 out_folder=Path(tempdir),
             )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

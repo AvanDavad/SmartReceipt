@@ -12,16 +12,16 @@ PROJ_DIR = Path(__file__).parents[2]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--rootdir", type=str, default=PROJ_DIR / "data"
-    )
+    parser.add_argument("--rootdir", type=str, default=PROJ_DIR / "data")
     parser.add_argument("--split", type=str, default="train")
     parser.add_argument("--augment", action="store_true")
     parser.add_argument("--shuffle", action="store_true")
     parser.add_argument("--repeat", type=int, default=1)
     parser.add_argument("--max_num_chars", type=int, default=50)
     parser.add_argument("--w", type=int, default=5)
-    parser.add_argument("--out_folder", type=str, default="visualization/phase2char_dataset")
+    parser.add_argument(
+        "--out_folder", type=str, default="visualization/phase2char_dataset"
+    )
     args = parser.parse_args()
 
     rootdir: Path = Path(args.rootdir) / args.split

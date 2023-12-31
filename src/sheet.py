@@ -14,4 +14,6 @@ wks = sh.worksheet("2023 tételes")
 
 # wks.add_rows(4)
 
-wks.insert_row([4, 11, -2500, "autó", "tisztítás", "Budapest", "CIB kártya", "-"], 3)
+wks.insert_row(
+    [4, 11, -2500, "autó", "tisztítás", "Budapest", "CIB kártya", "-"], 3
+)

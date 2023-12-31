@@ -47,8 +47,6 @@ class CNNModule2Points(pl.LightningModule):
         self.log("val_loss", loss, prog_bar=True)
 
 
-
-
 class CNNModuleLineDetection(pl.LightningModule):
     def __init__(self):
         super().__init__()

@@ -5,14 +5,19 @@ from src.readers.image_reader import ImageReader
 from src.line_dataset import LineDataset
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rootdir", type=str, default="/home/avandavad/projects/receipt_extractor/data/train")
+    parser.add_argument(
+        "--rootdir",
+        type=str,
+        default="/home/avandavad/projects/receipt_extractor/data/train",
+    )
     parser.add_argument("--augment", action="store_true")
     parser.add_argument("--shuffle", action="store_true")
     parser.add_argument("--repeat", type=int, default=1)
-    parser.add_argument("--out_folder", type=str, default="visualization/line_dataset")
+    parser.add_argument(
+        "--out_folder", type=str, default="visualization/line_dataset"
+    )
 
     args = parser.parse_args()
 

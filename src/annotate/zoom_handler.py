@@ -1,5 +1,3 @@
-
-
 import numpy as np
 from PIL import Image
 
@@ -7,6 +5,7 @@ ZOOM_OUT_FACTOR = 1.2
 ZOOM_IN_FACTOR = 1.0 / ZOOM_OUT_FACTOR
 
 MOVE_FACTOR = 0.1
+
 
 class ImageZoomHandler:
     """
@@ -30,6 +29,7 @@ class ImageZoomHandler:
     self.scale: the scale factor of the canvas.
     self.topleft: the top left corner of the canvas on the image
     """
+
     def __init__(self, img: Image, canvas_w: int, canvas_h: int, scale=1.0):
         self.img = img.copy()
 
@@ -51,14 +51,19 @@ class ImageZoomHandler:
         img_np = np.array(self.img)
         img_crop_np = np.array(Image.new("RGB", (cw, ch), color="black"))
 
-        if x0 < self.img_w and 0 <= x0 + cw and y0 < self.img_h and 0 <= y0 + ch:
+        if (
+            x0 < self.img_w
+            and 0 <= x0 + cw
+            and y0 < self.img_h
+            and 0 <= y0 + ch
+        ):
             h = self.img.height
             w = self.img.width
             i0, i1 = max(0, y0), min(h, y0 + ch)
             j0, j1 = max(0, x0), min(w, x0 + cw)
-            ci0, ci1 = max(0, -y0), min(ch, h-y0)
+            ci0, ci1 = max(0, -y0), min(ch, h - y0)
             cj0, cj1 = max(0, -x0), min(cw, w - x0)
-            img_crop_np[ci0:ci1, cj0: cj1] = img_np[i0:i1, j0:j1].copy()
+            img_crop_np[ci0:ci1, cj0:cj1] = img_np[i0:i1, j0:j1].copy()
 
         return Image.fromarray(img_crop_np)
 

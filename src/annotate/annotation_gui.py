@@ -1,5 +1,11 @@
 from pathlib import Path
-from src.annotate.phase_handlers import PHASE_1_NUM_KEYPOINTS, Phase0Handler, Phase1Handler, Phase2Handler, Phase3Handler
+from src.annotate.phase_handlers import (
+    PHASE_1_NUM_KEYPOINTS,
+    Phase0Handler,
+    Phase1Handler,
+    Phase2Handler,
+    Phase3Handler,
+)
 import sys
 
 import numpy as np
@@ -12,8 +18,8 @@ from tkinter import filedialog, ttk
 CANVAS_W = 800
 CANVAS_H = 600
 
-class AnnotationGUI:
 
+class AnnotationGUI:
     def __init__(self, root, args):
         self.args = args
         self.phase_handlers = []
@@ -39,7 +45,9 @@ class AnnotationGUI:
 
     def _init_textbox(self):
         self.textbox = tk.Text(self.main_frame, width=120, height=10)
-        self.textbox.configure(state="disabled")  # Initially set to non-editable
+        self.textbox.configure(
+            state="disabled"
+        )  # Initially set to non-editable
         self.textbox.grid(row=1, column=1)
         self.textbox.bind("<KeyRelease>", self.on_text_update)
 
@@ -52,7 +60,9 @@ class AnnotationGUI:
         )
         self.next_button.grid(row=0, column=0)
 
-        self.save_button = ttk.Button(self.button_frame, text="Save", command=self.save)
+        self.save_button = ttk.Button(
+            self.button_frame, text="Save", command=self.save
+        )
         self.save_button.grid(row=1, column=0)
 
     def _init_canvas(self):
@@ -60,7 +70,10 @@ class AnnotationGUI:
         self.canvas_h = CANVAS_H
 
         self.canvas = tk.Canvas(
-            self.main_frame, bg="black", width=self.canvas_w, height=self.canvas_h
+            self.main_frame,
+            bg="black",
+            width=self.canvas_w,
+            height=self.canvas_h,
         )
         self.canvas.grid(row=0, column=1)
 
@@ -70,7 +83,9 @@ class AnnotationGUI:
         self.canvas.bind("<Button-3>", self.on_right_click)
         self.canvas.bind("<Motion>", self.on_mouse_move)
 
-        self._mouse_pos_canvas = np.array([self.canvas_w/2, self.canvas_h/2])
+        self._mouse_pos_canvas = np.array(
+            [self.canvas_w / 2, self.canvas_h / 2]
+        )
 
     def choose_image_and_load(self):
         self.base_img_name = self.choose_image_file()
@@ -97,8 +112,15 @@ class AnnotationGUI:
         if annot_dict["phase_idx"] >= 0:
             self.to_phase_0(base_points=annot_dict["base_points"])
         if annot_dict["phase_idx"] >= 1:
-            dest_size_wh = (annot_dict["ortho_width"], annot_dict["ortho_height"])
-            self.to_phase_1(lines_y=annot_dict["lines_y"], M=annot_dict["M"], dest_size_wh=dest_size_wh)
+            dest_size_wh = (
+                annot_dict["ortho_width"],
+                annot_dict["ortho_height"],
+            )
+            self.to_phase_1(
+                lines_y=annot_dict["lines_y"],
+                M=annot_dict["M"],
+                dest_size_wh=dest_size_wh,
+            )
         if annot_dict["phase_idx"] >= 2:
             self.to_phase_2(lines_x=annot_dict["lines_x"])
         if annot_dict["phase_idx"] >= 3:
@@ -181,7 +203,9 @@ class AnnotationGUI:
         mouse_pos_canvas = np.array([event.x, event.y])
         mouse_pos_img = self.zoom_handler.transform_canvas2img(mouse_pos_canvas)
 
-        next_phase = self.phase_handler.on_left_click(mouse_pos_img, mouse_pos_canvas)
+        next_phase = self.phase_handler.on_left_click(
+            mouse_pos_img, mouse_pos_canvas
+        )
         if next_phase:
             self.next_phase()
 
@@ -256,7 +280,9 @@ class AnnotationGUI:
         print(f"phase: {self.phase_idx}")
 
     def to_phase_0(self, base_points=[]):
-        assert self.phase_idx == -1, f"phase_idx is {self.phase_idx}, expected -1"
+        assert (
+            self.phase_idx == -1
+        ), f"phase_idx is {self.phase_idx}, expected -1"
         self.phase_handler = Phase0Handler(
             self.base_img,
             self.canvas_w,
@@ -267,7 +293,9 @@ class AnnotationGUI:
 
     def to_phase_1(self, lines_y=[], M=None, dest_size_wh=None):
         assert self.phase_idx == 0, f"phase_idx is {self.phase_idx}, expected 0"
-        self.phase_handler = Phase1Handler(self.phase_handler, lines_y=lines_y, M=M, dest_size_wh=dest_size_wh)
+        self.phase_handler = Phase1Handler(
+            self.phase_handler, lines_y=lines_y, M=M, dest_size_wh=dest_size_wh
+        )
         self.phase_handlers.append(self.phase_handler)
 
     def to_phase_2(self, lines_x=[0]):
@@ -277,7 +305,9 @@ class AnnotationGUI:
 
     def to_phase_3(self, text=""):
         assert self.phase_idx == 2, f"phase_idx is {self.phase_idx}, expected 2"
-        self.phase_handler = Phase3Handler(self.phase_handler, text=text, textbox=self.textbox)
+        self.phase_handler = Phase3Handler(
+            self.phase_handler, text=text, textbox=self.textbox
+        )
         self.phase_handlers.append(self.phase_handler)
 
     def save(self):

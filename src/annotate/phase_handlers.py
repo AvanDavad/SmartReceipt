@@ -2,7 +2,10 @@ import abc
 from src.annotate.zoom_handler import ImageZoomHandler
 from src.camera_calib import get_camera_calib
 from src.visualization.font import get_font
-from src.warp_perspective import warp_perspective, warp_perspective_with_nonlin_least_squares
+from src.warp_perspective import (
+    warp_perspective,
+    warp_perspective_with_nonlin_least_squares,
+)
 
 import numpy as np
 from PIL import Image
@@ -22,6 +25,7 @@ BASEPOINT_CORNER_INDICES = {
     "left": [0, 2],
     "right": [1, 3],
 }
+
 
 def draw_lines_x(draw, lines_x, zoom_handler, img_height):
     for x in lines_x:
@@ -91,10 +95,12 @@ class Phase0Handler(PhaseHandler):
 
     def create_image_on_canvas(self, draw, mouse_pos_canvas):
         for base_point in self.base_points:
-            p = self.zoom_handler.transform_img2canvas(base_point).astype(np.int64)
+            p = self.zoom_handler.transform_img2canvas(base_point).astype(
+                np.int64
+            )
             draw.ellipse((p[0] - 5, p[1] - 5, p[0] + 5, p[1] + 5), fill="red")
         # draw lines
-        for p0, p1 in [(0,1), (0,2), (1,3), (2,3)]:
+        for p0, p1 in [(0, 1), (0, 2), (1, 3), (2, 3)]:
             if len(self.base_points) < p1 + 1:
                 break
             line_pt0 = self.zoom_handler.transform_img2canvas(
@@ -124,6 +130,7 @@ class Phase0Handler(PhaseHandler):
     def on_text_update(self, event):
         pass
 
+
 class Phase1Handler(PhaseHandler):
     def __init__(self, prev_handler, lines_y=[], M=None, dest_size_wh=None):
         self.prev_handler = prev_handler
@@ -134,13 +141,18 @@ class Phase1Handler(PhaseHandler):
         )
         self.lines_y = lines_y
 
-        self.base_points_ortho = Phase1Handler.base_points_to_ortho(self.base_points, self.M)
+        self.base_points_ortho = Phase1Handler.base_points_to_ortho(
+            self.base_points, self.M
+        )
 
     def _init_ortho(self, M, dest_size_wh):
         if M is None:
             camera_matrix, dist_coeffs = get_camera_calib()
             ortho_img, _, M = warp_perspective_with_nonlin_least_squares(
-                self.base_img, np.array(self.base_points), camera_matrix, dist_coeffs
+                self.base_img,
+                np.array(self.base_points),
+                camera_matrix,
+                dist_coeffs,
             )
         else:
             assert dest_size_wh is not None
@@ -167,7 +179,9 @@ class Phase1Handler(PhaseHandler):
     def create_image_on_canvas(self, draw, mouse_pos_canvas):
         for y in self.lines_y:
             pt0 = self.zoom_handler.transform_img2canvas([0, y])
-            pt1 = self.zoom_handler.transform_img2canvas([self.ortho_img.width, y])
+            pt1 = self.zoom_handler.transform_img2canvas(
+                [self.ortho_img.width, y]
+            )
             draw.line((pt0[0], pt0[1], pt1[0], pt1[1]), fill="blue", width=1)
 
     @staticmethod
@@ -201,7 +215,9 @@ class Phase1Handler(PhaseHandler):
         else:
             line_height = self.lines_y[-1] - self.lines_y[-2]
             num_lines = int(np.round((curr_y - self.lines_y[-1]) / line_height))
-            additional_lines = np.linspace(self.lines_y[-1], curr_y, num_lines + 1)[1:]
+            additional_lines = np.linspace(
+                self.lines_y[-1], curr_y, num_lines + 1
+            )[1:]
             self.lines_y.extend(additional_lines.tolist())
         return False
 
@@ -212,11 +228,14 @@ class Phase1Handler(PhaseHandler):
     def on_text_update(self, event):
         pass
 
+
 class Phase2Handler(PhaseHandler):
     def __init__(self, prev_handler, lines_x=[0]):
         self.prev_handler = prev_handler
 
-        composite_img = get_composite_img_lines(self.ortho_img, self.lines_y, with_underline=False)
+        composite_img = get_composite_img_lines(
+            self.ortho_img, self.lines_y, with_underline=False
+        )
         self.img = composite_img
 
         self.zoom_handler = ImageZoomHandler(
@@ -285,6 +304,7 @@ class Phase2Handler(PhaseHandler):
     def on_text_update(self, event):
         pass
 
+
 class Phase3Handler(PhaseHandler):
     def __init__(self, prev_handler, text, textbox):
         self.prev_handler = prev_handler
@@ -295,10 +315,14 @@ class Phase3Handler(PhaseHandler):
 
         self.text = text
 
-        composite_img = get_composite_img_lines(self.ortho_img, self.lines_y, with_underline=True)
+        composite_img = get_composite_img_lines(
+            self.ortho_img, self.lines_y, with_underline=True
+        )
         self.img = composite_img
 
-        self.zoom_handler = ImageZoomHandler(self.img, self.canvas_w, self.canvas_h)
+        self.zoom_handler = ImageZoomHandler(
+            self.img, self.canvas_w, self.canvas_h
+        )
         x_offset = self.get_x_offset()
         self.zoom_handler.move_img_point_to_canvas_point(
             np.array([x_offset, self.img.height // 2])
@@ -327,8 +351,7 @@ class Phase3Handler(PhaseHandler):
     def get_x_offset(self):
         if len(self.text) < len(self.lines_x) - 1:
             x_offset = 0.5 * (
-                self.lines_x[len(self.text)]
-                + self.lines_x[len(self.text) + 1]
+                self.lines_x[len(self.text)] + self.lines_x[len(self.text) + 1]
             )
         else:
             x_offset = self.lines_x[-1]
@@ -346,7 +369,9 @@ class Phase3Handler(PhaseHandler):
 
     def draw_text(self, draw):
         for x, ch in zip(self.lines_x, self.text):
-            pt = self.zoom_handler.transform_img2canvas([x, self.img.height // 2])
+            pt = self.zoom_handler.transform_img2canvas(
+                [x, self.img.height // 2]
+            )
             if pt[0] > -10:
                 draw.text((pt[0], pt[1]), ch, fill="black", font=FONT)
 

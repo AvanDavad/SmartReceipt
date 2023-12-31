@@ -7,9 +7,12 @@ import unittest
 from pathlib import Path
 import numpy as np
 
+
 class TestCharReader(unittest.TestCase):
     def setUp(self):
-        rootdir = Path(__file__).parent.parent.parent.parent / "test_data" / "train"
+        rootdir = (
+            Path(__file__).parent.parent.parent.parent / "test_data" / "train"
+        )
         self.image_reader = ImageReader(rootdir)
         self.char_reader = CharReader(self.image_reader)
 
@@ -35,13 +38,19 @@ class TestCharReader(unittest.TestCase):
                     assert y0 < y1
                     if crop_last is not None:
                         np.testing.assert_almost_equal(
-                            crop_last[2], x0, decimal=3,
+                            crop_last[2],
+                            x0,
+                            decimal=3,
                         )
                         np.testing.assert_almost_equal(
-                            crop_last[1], y0, decimal=3,
+                            crop_last[1],
+                            y0,
+                            decimal=3,
                         )
                         np.testing.assert_almost_equal(
-                            crop_last[3], y1, decimal=3,
+                            crop_last[3],
+                            y1,
+                            decimal=3,
                         )
                     crop_last = patch.crop_xyxy
                 else:
@@ -49,13 +58,19 @@ class TestCharReader(unittest.TestCase):
 
             if crop_last is not None:
                 np.testing.assert_almost_equal(
-                    crop_last[2], sample.patch.crop_xyxy[0], decimal=3,
+                    crop_last[2],
+                    sample.patch.crop_xyxy[0],
+                    decimal=3,
                 )
                 np.testing.assert_almost_equal(
-                    crop_last[1], sample.patch.crop_xyxy[1], decimal=3,
+                    crop_last[1],
+                    sample.patch.crop_xyxy[1],
+                    decimal=3,
                 )
                 np.testing.assert_almost_equal(
-                    crop_last[3], sample.patch.crop_xyxy[3], decimal=3,
+                    crop_last[3],
+                    sample.patch.crop_xyxy[3],
+                    decimal=3,
                 )
 
             crop_last = sample.patch.crop_xyxy
@@ -68,16 +83,23 @@ class TestCharReader(unittest.TestCase):
                     assert x0 < x1
                     assert y0 < y1
                     np.testing.assert_almost_equal(
-                        crop_last[2], x0, decimal=3,
+                        crop_last[2],
+                        x0,
+                        decimal=3,
                     )
                     np.testing.assert_almost_equal(
-                        crop_last[1], y0, decimal=3,
+                        crop_last[1],
+                        y0,
+                        decimal=3,
                     )
                     np.testing.assert_almost_equal(
-                        crop_last[3], y1, decimal=3,
+                        crop_last[3],
+                        y1,
+                        decimal=3,
                     )
 
                 crop_last = patch.crop_xyxy
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

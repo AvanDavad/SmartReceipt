@@ -10,15 +10,18 @@ import time
 
 
 def main(args):
-
     train_reader = ImageReader(args.train_data)
     val_reader = ImageReader(args.val_data)
 
     train_dataset = LineDataset(train_reader, augment=True, shuffle=True)
     val_dataset = LineDataset(val_reader, augment=False, shuffle=False)
 
-    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=4)
-    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, num_workers=4)
+    train_dataloader = DataLoader(
+        train_dataset, batch_size=args.batch_size, num_workers=4
+    )
+    val_dataloader = DataLoader(
+        val_dataset, batch_size=args.batch_size, num_workers=4
+    )
 
     if args.from_scratch:
         model = CNNModuleLineDetection()
@@ -43,7 +46,8 @@ def main(args):
     )
 
     trainer = Trainer(
-        default_root_dir=Path(args.model_checkpoints) / "CNNModuleLineDetection",
+        default_root_dir=Path(args.model_checkpoints)
+        / "CNNModuleLineDetection",
         accelerator="gpu",
         max_epochs=args.max_epochs,
         callbacks=[checkpoint_callback],
@@ -61,15 +65,28 @@ def main(args):
     )
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--train_data", type=str, default="/home/avandavad/projects/receipt_extractor/data/train")
-    parser.add_argument("--val_data", type=str, default="/home/avandavad/projects/receipt_extractor/data/val")
+    parser.add_argument(
+        "--train_data",
+        type=str,
+        default="/home/avandavad/projects/receipt_extractor/data/train",
+    )
+    parser.add_argument(
+        "--val_data",
+        type=str,
+        default="/home/avandavad/projects/receipt_extractor/data/val",
+    )
     parser.add_argument("--from_scratch", action="store_true")
     parser.add_argument("--version_num", type=int, default=0)
-    parser.add_argument("--ckpt_name", type=str, default="resnet-epoch=85-val_loss=0.04748")
-    parser.add_argument("--model_checkpoints", type=str, default="/home/avandavad/projects/receipt_extractor/model_checkpoints")
+    parser.add_argument(
+        "--ckpt_name", type=str, default="resnet-epoch=85-val_loss=0.04748"
+    )
+    parser.add_argument(
+        "--model_checkpoints",
+        type=str,
+        default="/home/avandavad/projects/receipt_extractor/model_checkpoints",
+    )
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--max_epochs", type=int, default=1000)
 

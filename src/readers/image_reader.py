@@ -33,11 +33,16 @@ class Sample:
         self_msg = self_msg + f"\n\tphase_0_points {self.phase_0_points.shape}"
         if self.phase_1_image is not None:
             self_msg = self_msg + f"\n\tphase_1_image {self.phase_1_image.size}"
-            self_msg = self_msg + f"\n\tphase_1_lines {self.phase_1_lines.shape}"
+            self_msg = (
+                self_msg + f"\n\tphase_1_lines {self.phase_1_lines.shape}"
+            )
         if self.phase_2_lines is not None:
-            self_msg = self_msg + f"\n\tphase_2_lines {self.phase_2_lines.shape}"
+            self_msg = (
+                self_msg + f"\n\tphase_2_lines {self.phase_2_lines.shape}"
+            )
         self_msg = self_msg + "\n)"
         return self_msg
+
 
 class ImageReader:
     def __init__(self, rootdir: Union[str, Path]):
@@ -76,7 +81,9 @@ class ImageReader:
             M = np.array(annot["M"])
             ortho_height = annot["ortho_height"]
             ortho_width = annot["ortho_width"]
-            phase_1_ortho_img = cv2.warpPerspective(src_img, M, (ortho_width, ortho_height))
+            phase_1_ortho_img = cv2.warpPerspective(
+                src_img, M, (ortho_width, ortho_height)
+            )
             phase_1_ortho_img = Image.fromarray(phase_1_ortho_img)
 
             phase_1_lines = np.array(annot["lines_y"])
@@ -101,7 +108,6 @@ class ImageReader:
 
         return sample
 
-
     def show(self, idx: int, out_folder: Path, verbose: bool = False):
         out_folder = out_folder / str(idx).zfill(4)
         out_folder.mkdir(parents=True, exist_ok=True)
@@ -125,7 +131,9 @@ class ImageReader:
             ortho_img = sample.phase_1_image
             ax.imshow(ortho_img)
             for line_y in sample.phase_1_lines:
-                ax.plot([0, ortho_img.width], [line_y, line_y], c="r", linewidth=1)
+                ax.plot(
+                    [0, ortho_img.width], [line_y, line_y], c="r", linewidth=1
+                )
             plt.savefig(filename)
             plt.close()
             has_phase_1 = True
@@ -140,7 +148,7 @@ class ImageReader:
             x_offset = 0
             text_offset = 0
             for i, (ly0, ly1) in enumerate(zip(line_y0, line_y1)):
-                img_line = ortho_img_np[int(ly0):int(ly1), :, :]
+                img_line = ortho_img_np[int(ly0) : int(ly1), :, :]
                 fig, ax = plt.subplots(3, 1, figsize=(10, 3))
                 ax[0].imshow(img_line)
                 ax[1].imshow(img_line)
@@ -151,15 +159,25 @@ class ImageReader:
                         continue
                     if x - x_offset > img_line.shape[1]:
                         break
-                    ax[1].plot([x - x_offset, x - x_offset], [0, img_line.shape[0]], c="r", linewidth=1)
-                    ax[2].plot([x - x_offset, x - x_offset], [0, img_line.shape[0]], c="r", linewidth=1)
+                    ax[1].plot(
+                        [x - x_offset, x - x_offset],
+                        [0, img_line.shape[0]],
+                        c="r",
+                        linewidth=1,
+                    )
+                    ax[2].plot(
+                        [x - x_offset, x - x_offset],
+                        [0, img_line.shape[0]],
+                        c="r",
+                        linewidth=1,
+                    )
                     if not first_line:
-                        ch = sample.phase_2_text[j-1]
-                        x0 = sample.phase_2_lines[j-1] - x_offset
+                        ch = sample.phase_2_text[j - 1]
+                        x0 = sample.phase_2_lines[j - 1] - x_offset
                         x1 = sample.phase_2_lines[j] - x_offset
                         ax[2].text(
-                            (x0+x1)/2,
-                            img_line.shape[0]/2,
+                            (x0 + x1) / 2,
+                            img_line.shape[0] / 2,
                             ch,
                             fontsize=14,
                             color="white",
@@ -179,11 +197,13 @@ class ImageReader:
                 plt.close()
 
                 x_offset += img_line.shape[1]
-                text_offset += j-1
+                text_offset += j - 1
             has_phase_2 = True
 
         if verbose:
             img_name, _ = self.data[idx]
             has_phase_1_str = "\t\t" if has_phase_1 else "no phase_1"
             has_phase_2_str = "\t\t" if has_phase_2 else "no phase_2"
-            print(f"{idx}: ({img_name.stem}) {has_phase_1_str} {has_phase_2_str}")
+            print(
+                f"{idx}: ({img_name.stem}) {has_phase_1_str} {has_phase_2_str}"
+            )

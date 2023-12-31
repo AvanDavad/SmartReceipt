@@ -14,6 +14,7 @@ import time
 
 PROJ_DIR = Path(__file__).parents[2]
 
+
 def main(args):
     train_reader = ImageReader(args.train_data)
     val_reader = ImageReader(args.val_data)
@@ -24,7 +25,9 @@ def main(args):
     train_dataloader = DataLoader(
         train_dataset, batch_size=args.batch_size, num_workers=4
     )
-    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, num_workers=4)
+    val_dataloader = DataLoader(
+        val_dataset, batch_size=args.batch_size, num_workers=4
+    )
 
     if args.from_scratch:
         model = CNNModulePhase1Line()

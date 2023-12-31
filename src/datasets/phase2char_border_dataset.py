@@ -12,7 +12,6 @@ from PIL import Image
 from src.readers.char_reader import CharReader
 
 
-
 class Phase2CharBorderDataset(Dataset):
     MEAN = [0.5, 0.5, 0.5]
     STD = [0.2, 0.2, 0.2]
@@ -53,10 +52,17 @@ class Phase2CharBorderDataset(Dataset):
         x_left = x0
         y_top = y0 + (y1 - y0) / 2 - img_crop_size / 2
         if self.augment:
-            x_left += np.random.uniform(-0.1*(x1-x0), 0.1*(x1-x0))
-            y_top += np.random.uniform(-0.1, 0.1) * (y1-y0)
+            x_left += np.random.uniform(-0.1 * (x1 - x0), 0.1 * (x1 - x0))
+            y_top += np.random.uniform(-0.1, 0.1) * (y1 - y0)
 
-        img_crop = sample.image.crop((int(x_left), int(y_top), int(x_left) + img_crop_size, int(y_top) + img_crop_size))
+        img_crop = sample.image.crop(
+            (
+                int(x_left),
+                int(y_top),
+                int(x_left) + img_crop_size,
+                int(y_top) + img_crop_size,
+            )
+        )
         assert img_crop.width == img_crop.height
 
         img_tensor = Phase2CharBorderDataset.TRANSFORMS(img_crop)
@@ -73,14 +79,19 @@ class Phase2CharBorderDataset(Dataset):
     def img_from_tensor(img_tensor: Tensor) -> Image.Image:
         img: np.ndarray = img_tensor.permute(1, 2, 0).numpy()
         img = (
-            img * np.array(Phase2CharBorderDataset.STD) + np.array(Phase2CharBorderDataset.MEAN)
+            img * np.array(Phase2CharBorderDataset.STD)
+            + np.array(Phase2CharBorderDataset.MEAN)
         ) * 255.0
         img = img.astype(np.uint8)
         img_pil = Image.fromarray(img)
         return img_pil
 
     def show(
-        self, idx: int, out_folder: Path, repeat_idx: int = 0, verbose: bool = False
+        self,
+        idx: int,
+        out_folder: Path,
+        repeat_idx: int = 0,
+        verbose: bool = False,
     ):
         sample_t = self[idx]
 

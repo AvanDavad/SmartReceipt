@@ -9,6 +9,7 @@ from pathlib import Path
 from src.readers.image_reader import ImageReader
 import time
 
+
 def remove_dir_with_all_contents(dir):
     if dir.is_dir():
         for file in dir.iterdir():
@@ -17,6 +18,7 @@ def remove_dir_with_all_contents(dir):
             else:
                 file.unlink()
         dir.rmdir()
+
 
 def main(args):
     out_folder = Path(args.out_folder) / args.split
@@ -31,11 +33,18 @@ def main(args):
     for idx in range(len(reader)):
         reader.show(idx, out_folder, verbose=True)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rootdir", type=str, default="/home/avandavad/projects/receipt_extractor/data")
+    parser.add_argument(
+        "--rootdir",
+        type=str,
+        default="/home/avandavad/projects/receipt_extractor/data",
+    )
     parser.add_argument("--split", type=str, default="train")
-    parser.add_argument("--out_folder", type=str, default="visualization/image_reader")
+    parser.add_argument(
+        "--out_folder", type=str, default="visualization/image_reader"
+    )
     args = parser.parse_args()
 
     main(args)

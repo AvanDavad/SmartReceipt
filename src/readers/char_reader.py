@@ -11,11 +11,13 @@ from typing import Tuple
 
 from dataclasses import dataclass
 
+
 @dataclass
 class PatchSample:
     crop_xyxy: Optional[Tuple[float, float, float, float]] = None
     label: Optional[str] = None
     is_double_space: Optional[bool] = None
+
 
 @dataclass
 class CharSample:
@@ -31,9 +33,12 @@ class CharSample:
         self_msg = self_msg + f"\n\t{len(self.pre_patches)} pre patches"
         self_msg = self_msg + f"\n\t{len(self.post_patches)} post patches"
         self_msg = self_msg + f"\n\tlabel: <{self.patch.label}>"
-        self_msg = self_msg + f"\n\tis_double_space: {self.patch.is_double_space}"
+        self_msg = (
+            self_msg + f"\n\tis_double_space: {self.patch.is_double_space}"
+        )
         self_msg = self_msg + "\n)"
         return self_msg
+
 
 class CharReader:
     def __init__(self, root_dir: Path, w: int = 5):
@@ -56,7 +61,9 @@ class CharReader:
                 data = json.load(f)
             line_coords = np.array(data["line_coords"])
             line_text = data["line_text"]
-            for j, (x0, x1) in enumerate(zip(line_coords[:-1], line_coords[1:])):
+            for j, (x0, x1) in enumerate(
+                zip(line_coords[:-1], line_coords[1:])
+            ):
                 self.mapping.append((i, x0, x1, line_text[j]))
 
     def __repr__(self):
@@ -83,7 +90,7 @@ class CharReader:
         is_double_space = this_char_is_space and next_char_is_like_space
 
         current_patch = PatchSample(
-            crop_xyxy=(x0, height_per_3, x1, 2*height_per_3),
+            crop_xyxy=(x0, height_per_3, x1, 2 * height_per_3),
             label=char,
             is_double_space=is_double_space,
         )
@@ -95,7 +102,12 @@ class CharReader:
 
                 if current_line_idx == line_idx:
                     patch = PatchSample(
-                        crop_xyxy=(x0_pre, height_per_3, x1_pre, 2*height_per_3),
+                        crop_xyxy=(
+                            x0_pre,
+                            height_per_3,
+                            x1_pre,
+                            2 * height_per_3,
+                        ),
                         label=char,
                     )
                 else:
@@ -112,7 +124,12 @@ class CharReader:
 
                 if current_line_idx == line_idx:
                     patch = PatchSample(
-                        crop_xyxy=(x0_post, height_per_3, x1_post, 2*height_per_3),
+                        crop_xyxy=(
+                            x0_post,
+                            height_per_3,
+                            x1_post,
+                            2 * height_per_3,
+                        ),
                         label=char,
                     )
                 else:
@@ -133,7 +150,7 @@ class CharReader:
 
     @property
     def window_size(self) -> int:
-        return 2*self._w + 1
+        return 2 * self._w + 1
 
     def show(self, idx: int, out_folder: Path):
         out_folder.mkdir(parents=True, exist_ok=True)
@@ -158,15 +175,24 @@ class CharReader:
         ax.imshow(img)
         patches_all = sample.pre_patches + [sample.patch] + sample.post_patches
         current_color = "r"
-        colors = ["k"] * len(sample.pre_patches) + [current_color] + ["y"] * len(sample.post_patches)
+        colors = (
+            ["k"] * len(sample.pre_patches)
+            + [current_color]
+            + ["y"] * len(sample.post_patches)
+        )
         for patch, color in zip(patches_all, colors):
             if patch.crop_xyxy is not None:
                 x0, y0, x1, y1 = patch.crop_xyxy
-                ax.plot([x0, x1-1.0, x1-1.0, x0, x0], [y0, y0, y1, y1, y0], c=color, linewidth=2)
+                ax.plot(
+                    [x0, x1 - 1.0, x1 - 1.0, x0, x0],
+                    [y0, y0, y1, y1, y0],
+                    c=color,
+                    linewidth=2,
+                )
                 if patch.label is not None and color == current_color:
                     ax.text(
-                        (x0+x1)/2,
-                        (y0+y1)/2,
+                        (x0 + x1) / 2,
+                        (y0 + y1) / 2,
                         patch.label,
                         fontsize=14,
                         color=color,
@@ -174,7 +200,12 @@ class CharReader:
                         verticalalignment="center",
                     )
                 if patch.is_double_space:
-                    ax.plot([x0, x1-1.0], [y0 + 0.1 * (y1-y0), y0 + 0.1 * (y1-y0)], c=color, linewidth=1)
+                    ax.plot(
+                        [x0, x1 - 1.0],
+                        [y0 + 0.1 * (y1 - y0), y0 + 0.1 * (y1 - y0)],
+                        c=color,
+                        linewidth=1,
+                    )
         x0 = crop_xyxy[:, 0].min()
         y0 = crop_xyxy[:, 1].min()
         x1 = crop_xyxy[:, 2].max()

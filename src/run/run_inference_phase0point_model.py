@@ -10,7 +10,10 @@ from src.models.phase0points_model import CNNModulePhase0Points
 from pathlib import Path
 
 PROJ_DIR = Path(__file__).parent.parent.parent
-LIGHTNING_LOGS = PROJ_DIR / "model_checkpoints" / "CNNModulePhase0Points" / "lightning_logs"
+LIGHTNING_LOGS = (
+    PROJ_DIR / "model_checkpoints" / "CNNModulePhase0Points" / "lightning_logs"
+)
+
 
 def main(args):
     ckpt_path = (
@@ -24,8 +27,12 @@ def main(args):
     # inference
     img_path_test = PROJ_DIR / "data" / "test"
     img_path_train = PROJ_DIR / "data" / "train"
-    out_folder_test = PROJ_DIR / "inference" / f"version_{args.version_num}" / "test"
-    out_folder_train = PROJ_DIR / "inference" / f"version_{args.version_num}" / "train"
+    out_folder_test = (
+        PROJ_DIR / "inference" / f"version_{args.version_num}" / "test"
+    )
+    out_folder_train = (
+        PROJ_DIR / "inference" / f"version_{args.version_num}" / "train"
+    )
     out_folder_test.mkdir(exist_ok=True, parents=True)
     out_folder_train.mkdir(exist_ok=True, parents=True)
 
@@ -41,10 +48,13 @@ def main(args):
             out_folder=out_folder_train,
         )
 
+
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument("--version_num", type=int, default=0)
-    argparser.add_argument("--ckpt_name", type=str, default="resnet-epoch=00-val_loss=0.00000")
+    argparser.add_argument(
+        "--ckpt_name", type=str, default="resnet-epoch=00-val_loss=0.00000"
+    )
 
     args = argparser.parse_args()
     main(args)

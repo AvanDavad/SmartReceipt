@@ -69,7 +69,9 @@ class Phase2CharDataset(Dataset):
                 x_right = int(x_left + img_sidelen)
                 y_bottom = int(y_top + img_sidelen)
 
-                img_patch = sample.image.crop((x_left, y_top, x_right, y_bottom))
+                img_patch = sample.image.crop(
+                    (x_left, y_top, x_right, y_bottom)
+                )
                 if patch_idx == len(sample.pre_patches):
                     char_width = (x1 - x0) / img_sidelen
             else:
@@ -99,14 +101,19 @@ class Phase2CharDataset(Dataset):
     def img_from_tensor(img_tensor: Tensor) -> Image.Image:
         img: np.ndarray = img_tensor.permute(1, 2, 0).numpy()
         img = (
-            img * np.array(Phase2CharDataset.STD) + np.array(Phase2CharDataset.MEAN)
+            img * np.array(Phase2CharDataset.STD)
+            + np.array(Phase2CharDataset.MEAN)
         ) * 255.0
         img = img.astype(np.uint8)
         img_pil = Image.fromarray(img)
         return img_pil
 
     def show(
-        self, idx: int, out_folder: Path, repeat_idx: int = 0, verbose: bool = False
+        self,
+        idx: int,
+        out_folder: Path,
+        repeat_idx: int = 0,
+        verbose: bool = False,
     ):
         sample_t = self[idx]
 
@@ -120,14 +127,18 @@ class Phase2CharDataset(Dataset):
                 img = draw_vertical_line(img, int(img.width * char_width))
                 is_double_space = sample_t["is_double_space"].item()
                 if is_double_space:
-                    img = draw_text_on_image(img, text="d.s.", pos=(0, img.height // 2))
+                    img = draw_text_on_image(
+                        img, text="d.s.", pos=(0, img.height // 2)
+                    )
 
             images.append(img)
 
         pad_size = 10
         new_height = self.IMG_SIZE + 2 * pad_size
         new_width = (self.IMG_SIZE + pad_size) * len(images) + pad_size
-        img_big = Image.new("RGB", (new_width, new_height), color=(255, 255, 255))
+        img_big = Image.new(
+            "RGB", (new_width, new_height), color=(255, 255, 255)
+        )
 
         for img_idx, img in enumerate(images):
             img_big.paste(

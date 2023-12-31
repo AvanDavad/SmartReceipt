@@ -11,6 +11,7 @@ import time
 
 PROJ_DIR = Path(__file__).parents[2]
 
+
 def main(args):
     image_reader_tr = ImageReader(args.train_data)
     image_reader_val = ImageReader(args.val_data)
@@ -18,13 +19,17 @@ def main(args):
     char_reader_tr = CharReader(image_reader_tr, w=args.w)
     char_reader_val = CharReader(image_reader_val, w=args.w)
 
-    train_dataset = Phase2CharDataset(char_reader_tr, augment=True, shuffle=True)
+    train_dataset = Phase2CharDataset(
+        char_reader_tr, augment=True, shuffle=True
+    )
     val_dataset = Phase2CharDataset(char_reader_val, augment=False)
 
     train_dataloader = DataLoader(
         train_dataset, batch_size=args.batch_size, num_workers=4
     )
-    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, num_workers=4)
+    val_dataloader = DataLoader(
+        val_dataset, batch_size=args.batch_size, num_workers=4
+    )
 
     if args.from_scratch:
         model = CNNModulePhase2Chars()
@@ -83,9 +88,7 @@ if __name__ == "__main__":
     parser.add_argument("--from_scratch", action="store_true")
     parser.add_argument("--w", type=int, default=5)
     parser.add_argument("--version_num", type=int)
-    parser.add_argument(
-        "--ckpt_name", type=str
-    )
+    parser.add_argument("--ckpt_name", type=str)
     parser.add_argument(
         "--model_checkpoints",
         type=str,

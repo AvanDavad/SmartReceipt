@@ -23,7 +23,9 @@ def main(args):
     train_dataloader = DataLoader(
         train_dataset, batch_size=args.batch_size, num_workers=4
     )
-    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, num_workers=4)
+    val_dataloader = DataLoader(
+        val_dataset, batch_size=args.batch_size, num_workers=4
+    )
 
     if args.from_scratch:
         model = CNNModulePhase0Points()

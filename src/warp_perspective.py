@@ -14,6 +14,7 @@ X0_LIST = [
     np.array([0.0, 0.0, np.pi, 0, 0, 100.0, 50.0]),
 ]
 
+
 def get_obj_points(height):
     objp = np.array(
         [[0, 0, 0], [64.0, 0, 0], [0, height, 0], [64.0, height, 0]]
@@ -32,20 +33,29 @@ def decode_x(x):
 def residual_function(x, gt_points, camera_matrix, dist_coeffs):
     rvec, tvec, _, obj_pts = decode_x(x)
 
-    img_pts, _ = cv2.projectPoints(obj_pts, rvec, tvec, camera_matrix, dist_coeffs)
+    img_pts, _ = cv2.projectPoints(
+        obj_pts, rvec, tvec, camera_matrix, dist_coeffs
+    )
     img_pts = img_pts.reshape(-1, 2)
 
     return (img_pts - gt_points).flatten()
 
+
 def warp_perspective(img, transformation_matrix, dest_size_wh):
-    out = cv2.warpPerspective(np.array(img), np.array(transformation_matrix), dest_size_wh)
+    out = cv2.warpPerspective(
+        np.array(img), np.array(transformation_matrix), dest_size_wh
+    )
     out_img = Image.fromarray(out)
     return out_img
+
 
 def warp_perspective_with_nonlin_least_squares(
     img, img_pts, camera_matrix, dist_coeffs, scale_factor=10.0, verbose=True
 ):
-    assert img_pts.shape == (PHASE_1_NUM_KEYPOINTS, 2), f"img_pts.shape is {img_pts.shape}, expected ({PHASE_1_NUM_KEYPOINTS}, 2)"
+    assert img_pts.shape == (
+        PHASE_1_NUM_KEYPOINTS,
+        2,
+    ), f"img_pts.shape is {img_pts.shape}, expected ({PHASE_1_NUM_KEYPOINTS}, 2)"
 
     for x0 in X0_LIST:
         print(f"Trying x0: {x0}")
@@ -68,7 +78,9 @@ def warp_perspective_with_nonlin_least_squares(
         print(f"translation vector: {tvec}")
         print(f"height: {height}")
 
-    img_pts, _ = cv2.projectPoints(obj_pts, rvec, tvec, camera_matrix, dist_coeffs)
+    img_pts, _ = cv2.projectPoints(
+        obj_pts, rvec, tvec, camera_matrix, dist_coeffs
+    )
 
     dst = obj_pts[:, :2].astype(np.float32) * scale_factor
     dst += np.array([5.0, 5.0]) * scale_factor
@@ -80,5 +92,7 @@ def warp_perspective_with_nonlin_least_squares(
 
     out_img = warp_perspective(img, M, (dst_width, dst_height))
 
-    new_img_pts = cv2.perspectiveTransform(img_pts.reshape(-1, 1, 2), M).reshape(-1, 2)
+    new_img_pts = cv2.perspectiveTransform(
+        img_pts.reshape(-1, 1, 2), M
+    ).reshape(-1, 2)
     return out_img, new_img_pts, M

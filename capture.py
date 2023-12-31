@@ -11,7 +11,10 @@ from src.models.phase0points_model import CNNModulePhase0Points
 from src.visualization.font import get_font
 
 PROJ_DIR = Path(__file__).parent
-LIGHTNING_LOGS = PROJ_DIR / "model_checkpoints" / "CNNModulePhase0Points" / "lightning_logs"
+LIGHTNING_LOGS = (
+    PROJ_DIR / "model_checkpoints" / "CNNModulePhase0Points" / "lightning_logs"
+)
+
 
 def main(args):
     ckpt_path = (
@@ -24,10 +27,10 @@ def main(args):
 
     video = cv2.VideoCapture(0)
 
-    a=0
+    a = 0
 
     while True:
-        a=a+1
+        a = a + 1
 
         check, frame = video.read()
 
@@ -39,7 +42,6 @@ def main(args):
         img = Image.fromarray(frame)
         img_tensor = Phase0PointsDataset.TRANSFORMS(img)
         img_tensor = img_tensor.unsqueeze(0)
-
 
         model.eval()
         with torch.no_grad():
@@ -75,29 +77,36 @@ def main(args):
             text_position = kpt
             draw.text(text_position, text, fill=text_color, font=font)
 
-        for i0, i1, col in [(0, 1, "red"), (0, 2, "red"), (1, 3, "red"), (2, 3, "yellow")]:
+        for i0, i1, col in [
+            (0, 1, "red"),
+            (0, 2, "red"),
+            (1, 3, "red"),
+            (2, 3, "yellow"),
+        ]:
             start_point = keypoints[i0]
             end_point = keypoints[i1]
             line_width = 5
             draw.line((start_point, end_point), fill=col, width=line_width)
 
-
         cv2.imshow("Capturing", np.array(img))
 
-        key=cv2.waitKey(1)
+        key = cv2.waitKey(1)
         if key == 27:
             break
         else:
-            pass #cv2.imshow("Please press the escape(esc) key to stop the video", frame)
+            pass  # cv2.imshow("Please press the escape(esc) key to stop the video", frame)
 
     print(a)
 
     video.release()
 
+
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument("--version_num", type=int, default=0)
-    argparser.add_argument("--ckpt_name", type=str, default="resnet-epoch=00-val_loss=0.00000")
+    argparser.add_argument(
+        "--ckpt_name", type=str, default="resnet-epoch=00-val_loss=0.00000"
+    )
 
     args = argparser.parse_args()
     main(args)

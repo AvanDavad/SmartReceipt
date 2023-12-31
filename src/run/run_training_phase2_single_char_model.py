@@ -10,13 +10,17 @@ import time
 
 PROJ_DIR = Path(__file__).parents[2]
 
-def main(args):
 
+def main(args):
     char_reader_tr = CharReader(args.train_data, w=0)
     char_reader_val = CharReader(args.val_data, w=0)
 
-    train_dataset = Phase2SingleCharDataset(char_reader_tr, augment=True, shuffle=True)
-    val_dataset = Phase2SingleCharDataset(char_reader_val, augment=False, shuffle=False)
+    train_dataset = Phase2SingleCharDataset(
+        char_reader_tr, augment=True, shuffle=True
+    )
+    val_dataset = Phase2SingleCharDataset(
+        char_reader_val, augment=False, shuffle=False
+    )
 
     print(f"train dataset size: {len(train_dataset)}")
     print(f"val dataset size: {len(val_dataset)}")
@@ -24,7 +28,9 @@ def main(args):
     train_dataloader = DataLoader(
         train_dataset, batch_size=args.batch_size, num_workers=4
     )
-    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, num_workers=4)
+    val_dataloader = DataLoader(
+        val_dataset, batch_size=args.batch_size, num_workers=4
+    )
 
     if args.from_scratch:
         model = CNNModulePhase2SingleChar()
@@ -54,7 +60,8 @@ def main(args):
     )
 
     trainer = Trainer(
-        default_root_dir=Path(args.model_checkpoints) / "CNNModulePhase2SingleChar",
+        default_root_dir=Path(args.model_checkpoints)
+        / "CNNModulePhase2SingleChar",
         accelerator="gpu",
         max_epochs=args.max_epochs,
         callbacks=[checkpoint_callback],
@@ -86,9 +93,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--from_scratch", action="store_true")
     parser.add_argument("--version_num", type=int)
-    parser.add_argument(
-        "--ckpt_name", type=str
-    )
+    parser.add_argument("--ckpt_name", type=str)
     parser.add_argument(
         "--model_checkpoints",
         type=str,

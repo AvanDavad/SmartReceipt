@@ -8,8 +8,12 @@ from src.run.run_all import get_best_ckpt_path
 
 PROJ_DIR = Path(__file__).parent.parent.parent
 
+
 def main(args):
-    ckpt_path = get_best_ckpt_path(PROJ_DIR / "model_checkpoints" / "CNNModulePhase2CharsBorder", version=args.version)
+    ckpt_path = get_best_ckpt_path(
+        PROJ_DIR / "model_checkpoints" / "CNNModulePhase2CharsBorder",
+        version=args.version,
+    )
     print(f"Loading model from {ckpt_path}")
     model = CNNModulePhase2CharsBorder().load_from_checkpoint(ckpt_path)
 
@@ -18,7 +22,12 @@ def main(args):
 
     input_image = Image.open("line_image.jpg")
     input_image = input_image.crop(
-        (0, int(input_image.height * args.top), input_image.width, int(input_image.height * args.bottom))
+        (
+            0,
+            int(input_image.height * args.top),
+            input_image.width,
+            int(input_image.height * args.bottom),
+        )
     )
 
     x_coords = model.inference(input_image)

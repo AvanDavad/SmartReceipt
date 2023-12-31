@@ -48,20 +48,30 @@ class LineDataset(Dataset):
 
         camera_matrix, dist_coeffs = get_camera_calib()
         img, base_kps, M = warp_perspective_with_nonlin_least_squares(
-            img, base_kps, camera_matrix, dist_coeffs, scale_factor=10.0, verbose=False
+            img,
+            base_kps,
+            camera_matrix,
+            dist_coeffs,
+            scale_factor=10.0,
+            verbose=False,
         )
-        line_kps = cv2.perspectiveTransform(line_kps.reshape(-1, 1, 2), M).reshape(
-            -1, 2
-        )
+        line_kps = cv2.perspectiveTransform(
+            line_kps.reshape(-1, 1, 2), M
+        ).reshape(-1, 2)
         curr_line_kps = line_kps[2 * j : 2 * j + 4]
 
-        crop_x0_max = max(1, min([int(base_kps[0, 0]), int(curr_line_kps[:, 0].min())]))
+        crop_x0_max = max(
+            1, min([int(base_kps[0, 0]), int(curr_line_kps[:, 0].min())])
+        )
         crop_x0 = np.random.randint(0, crop_x0_max) if self.augment else 0
         crop_x1_min = min(
-            img.width - 1, max([int(base_kps[3, 0]), int(curr_line_kps[:, 0].max())])
+            img.width - 1,
+            max([int(base_kps[3, 0]), int(curr_line_kps[:, 0].max())]),
         )
         crop_x1 = (
-            np.random.randint(crop_x1_min, img.width) if self.augment else img.width
+            np.random.randint(crop_x1_min, img.width)
+            if self.augment
+            else img.width
         )
         if is_first:
             y_min = int(base_kps[:4, 1].min())

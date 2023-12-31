@@ -7,9 +7,12 @@ import unittest
 from pathlib import Path
 from PIL import Image
 
+
 class TestPhase0PointsDataset(unittest.TestCase):
     def setUp(self):
-        rootdir = Path(__file__).parent.parent.parent.parent / "test_data" / "train"
+        rootdir = (
+            Path(__file__).parent.parent.parent.parent / "test_data" / "train"
+        )
         self.image_reader = ImageReader(rootdir)
 
     def test_dataset_len(self):
@@ -27,9 +30,12 @@ class TestPhase0PointsDataset(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             dataset.show(0, Path(tempdir))
 
+
 class TestPhase0PointsDatasetAugment(unittest.TestCase):
     def setUp(self):
-        rootdir = Path(__file__).parent.parent.parent.parent / "test_data" / "train"
+        rootdir = (
+            Path(__file__).parent.parent.parent.parent / "test_data" / "train"
+        )
         image_reader = ImageReader(rootdir)
 
         sample = image_reader[0]
@@ -38,28 +44,25 @@ class TestPhase0PointsDatasetAugment(unittest.TestCase):
         self.kps = torch.tensor(sample.phase_0_points).to(dtype=torch.float32)
 
     def test_crop_augment(self):
-
         img, kps = Phase0PointsDataset.color_augment(self.img, self.kps)
         assert isinstance(img, Image.Image)
         assert isinstance(kps, torch.Tensor)
 
     def test_rotate_augment(self):
-
         img, kps = Phase0PointsDataset.rotate(self.img, self.kps)
         assert isinstance(img, Image.Image)
         assert isinstance(kps, torch.Tensor)
 
     def test_perspective_augment(self):
-
         img, kps = Phase0PointsDataset.perspective_augment(self.img, self.kps)
         assert isinstance(img, Image.Image)
         assert isinstance(kps, torch.Tensor)
 
     def test_crop_augment(self):
-
         img, kps = Phase0PointsDataset.crop_augment(self.img, self.kps)
         assert isinstance(img, Image.Image)
         assert isinstance(kps, torch.Tensor)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
