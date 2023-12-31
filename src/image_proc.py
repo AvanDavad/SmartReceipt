@@ -18,5 +18,3 @@ bottom_right = (max_loc[0] + w, max_loc[1] + h)
 img = cv2.rectangle(img, max_loc, bottom_right, 255, 2)
 # img = cv2.circle(img, (max_loc[0] + 80, max_loc[1] + 80), radius=10, color=(255,0,0), thickness=2)
 cv2.imwrite("test.jpg", img)
-
-

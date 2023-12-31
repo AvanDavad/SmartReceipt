@@ -74,7 +74,7 @@ def main(args):
     line_image_list = model_1.inference(img, out_folder, prefix="2_lines")
 
     # reading lines
-    
+
     ckpt_path = get_best_ckpt_path(PROJ_DIR / "model_checkpoints" / "CNNModulePhase2CharsBorder")
     model_border = CNNModulePhase2CharsBorder().load_from_checkpoint(ckpt_path)
 
