@@ -1,5 +1,6 @@
 import argparse
 import tkinter as tk
+
 from src.annotate.annotation_gui import AnnotationGUI
 
 

@@ -1,13 +1,16 @@
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict
+from typing import Optional
+from typing import Tuple
+
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from src.datasets.phase2char_dataset import Phase2CharDataset
-from src.datasets.phase2char_dataset import ALL_CHARS
-from torch import Tensor
 from PIL import Image
+from torch import Tensor
 
+from src.datasets.phase2char_dataset import ALL_CHARS
+from src.datasets.phase2char_dataset import Phase2CharDataset
 from src.draw_utils import draw_for_char_recognition
 
 

@@ -1,15 +1,13 @@
-from typing import List, Optional
-import matplotlib.pyplot as plt
-from PIL import Image
-
-
 import json
+from dataclasses import dataclass
 from pathlib import Path
-
-import numpy as np
+from typing import List
+from typing import Optional
 from typing import Tuple
 
-from dataclasses import dataclass
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
 
 
 @dataclass

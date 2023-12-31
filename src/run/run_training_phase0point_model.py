@@ -1,16 +1,17 @@
 """
 python -m src.run.run_training_phase0point_model --from_scratch
 """
-
 import argparse
-from pytorch_lightning import Trainer
-from src.readers.image_reader import ImageReader
-from src.models.phase0points_model import CNNModulePhase0Points
-from src.datasets.phase0points_dataset import Phase0PointsDataset
-from torch.utils.data import DataLoader
-from pathlib import Path
-from pytorch_lightning.callbacks import ModelCheckpoint
 import time
+from pathlib import Path
+
+from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import ModelCheckpoint
+from torch.utils.data import DataLoader
+
+from src.datasets.phase0points_dataset import Phase0PointsDataset
+from src.models.phase0points_model import CNNModulePhase0Points
+from src.readers.image_reader import ImageReader
 
 
 def main(args):

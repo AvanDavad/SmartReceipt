@@ -1,9 +1,9 @@
-from src.readers.image_reader import ImageReader, Sample
-
-
 import tempfile
 import unittest
 from pathlib import Path
+
+from src.readers.image_reader import ImageReader
+from src.readers.image_reader import Sample
 
 
 class TestImageReader(unittest.TestCase):

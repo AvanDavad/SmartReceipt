@@ -2,6 +2,7 @@ import unittest
 
 import torch
 from torch import Tensor
+
 from src.models.phase2char_models import CNNBackbone
 
 

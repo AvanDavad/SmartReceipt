@@ -1,15 +1,15 @@
 from pathlib import Path
 from typing import Dict
-from src.datasets.phase2char_dataset import ALL_CHARS
-from src.draw_utils import draw_text_on_image
 
 import numpy as np
 import torch
+from PIL import Image
 from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision import transforms
-from PIL import Image
 
+from src.datasets.phase2char_dataset import ALL_CHARS
+from src.draw_utils import draw_text_on_image
 from src.readers.char_reader import CharReader
 
 

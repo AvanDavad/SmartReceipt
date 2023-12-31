@@ -1,16 +1,17 @@
 """
 python -m src.run.run_training_phase1line_model --from_scratch
 """
-
 import argparse
-from pytorch_lightning import Trainer
-from src.readers.image_reader import ImageReader
-from src.models.phase1line_model import CNNModulePhase1Line
-from src.datasets.phase1line_dataset import Phase1LineDataset
-from torch.utils.data import DataLoader
-from pathlib import Path
-from pytorch_lightning.callbacks import ModelCheckpoint
 import time
+from pathlib import Path
+
+from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import ModelCheckpoint
+from torch.utils.data import DataLoader
+
+from src.datasets.phase1line_dataset import Phase1LineDataset
+from src.models.phase1line_model import CNNModulePhase1Line
+from src.readers.image_reader import ImageReader
 
 PROJ_DIR = Path(__file__).parents[2]
 

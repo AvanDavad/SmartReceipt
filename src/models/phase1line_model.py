@@ -1,13 +1,17 @@
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List
+from typing import Optional
+from typing import Tuple
+
+import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-import numpy as np
-from torch.nn.functional import sigmoid
 from PIL import Image
-from src.draw_utils import put_stuffs_on_img
+from torch.nn.functional import sigmoid
+
 from src.datasets.phase1line_dataset import Phase1LineDataset
+from src.draw_utils import put_stuffs_on_img
 
 
 class Phase1LineBackbone(nn.Module):

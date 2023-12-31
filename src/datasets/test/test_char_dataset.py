@@ -1,11 +1,12 @@
-from src.datasets.phase2char_dataset import Phase2CharDataset
-from src.readers.char_reader import CharReader
-from src.readers.image_reader import ImageReader
-
-import torch
 import tempfile
 import unittest
 from pathlib import Path
+
+import torch
+
+from src.datasets.phase2char_dataset import Phase2CharDataset
+from src.readers.char_reader import CharReader
+from src.readers.image_reader import ImageReader
 
 
 class TestCharDataset(unittest.TestCase):

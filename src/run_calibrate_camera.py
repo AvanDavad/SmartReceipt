@@ -1,9 +1,10 @@
 import argparse
-import cv2
-from PIL import Image
-import numpy as np
-import pathlib
 import json
+import pathlib
+
+import cv2
+import numpy as np
+from PIL import Image
 
 np.set_printoptions(suppress=True, precision=3)
 

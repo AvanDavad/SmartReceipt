@@ -3,11 +3,11 @@ examples:
 python3 -m src.run.run_visualize_image_reader --split train
 python3 -m src.run.run_visualize_image_reader --split val
 """
-
 import argparse
-from pathlib import Path
-from src.readers.image_reader import ImageReader
 import time
+from pathlib import Path
+
+from src.readers.image_reader import ImageReader
 
 
 def remove_dir_with_all_contents(dir):

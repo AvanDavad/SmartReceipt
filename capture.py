@@ -1,12 +1,13 @@
 import argparse
 from pathlib import Path
+
 import cv2
-import torch
 import numpy as np
+import torch
 from PIL import Image
 from PIL import ImageDraw
-from src.datasets.phase0points_dataset import Phase0PointsDataset
 
+from src.datasets.phase0points_dataset import Phase0PointsDataset
 from src.models.phase0points_model import CNNModulePhase0Points
 from src.visualization.font import get_font
 

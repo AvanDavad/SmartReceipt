@@ -1,6 +1,6 @@
-from pathlib import Path
 import tempfile
 import unittest
+from pathlib import Path
 
 from src.models.phase0points_model import CNNModulePhase0Points
 

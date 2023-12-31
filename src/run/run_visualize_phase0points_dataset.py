@@ -1,9 +1,9 @@
 """
 python3 -m src.run.run_visualize_phase0points_dataset --augment --repeat 3
 """
-
 import argparse
 from pathlib import Path
+
 from src.datasets.phase0points_dataset import Phase0PointsDataset
 from src.readers.image_reader import ImageReader
 

@@ -1,8 +1,8 @@
 import argparse
 from pathlib import Path
-from src.readers.image_reader import ImageReader
 
 from src.line_dataset import LineDataset
+from src.readers.image_reader import ImageReader
 
 
 if __name__ == "__main__":

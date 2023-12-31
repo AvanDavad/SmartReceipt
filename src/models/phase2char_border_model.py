@@ -1,11 +1,14 @@
-from typing import Dict, Tuple
+from typing import Dict
+from typing import List
+from typing import Tuple
+
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from src.datasets.phase2char_border_dataset import Phase2CharBorderDataset
-from torch import Tensor
 from PIL import Image
-from typing import List
+from torch import Tensor
+
+from src.datasets.phase2char_border_dataset import Phase2CharBorderDataset
 
 
 class CNNBackbone(nn.Module):

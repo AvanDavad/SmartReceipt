@@ -1,14 +1,13 @@
 import argparse
+from pathlib import Path
+
+import numpy as np
+from PIL import Image
 
 from src.camera_calib import get_camera_calib
-from src.draw_utils import (
-    draw_borders,
-    draw_borders_with_chars_and_probs,
-    save_img_with_kps,
-)
-from pathlib import Path
-from PIL import Image
-import numpy as np
+from src.draw_utils import draw_borders
+from src.draw_utils import draw_borders_with_chars_and_probs
+from src.draw_utils import save_img_with_kps
 from src.models.phase0points_model import CNNModulePhase0Points
 from src.models.phase1line_model import CNNModulePhase1Line
 from src.models.phase2_single_char_model import CNNModulePhase2SingleChar

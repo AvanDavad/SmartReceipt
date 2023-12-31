@@ -1,10 +1,10 @@
-from src.draw_utils import put_stuffs_on_img
-
 import numpy as np
 import torch
+from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
-from PIL import Image
+
+from src.draw_utils import put_stuffs_on_img
 
 
 class Phase1LineDataset(Dataset):

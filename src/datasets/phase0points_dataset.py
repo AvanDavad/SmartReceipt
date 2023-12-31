@@ -1,16 +1,17 @@
 from pathlib import Path
+from typing import Dict
+from typing import Tuple
+
 import numpy as np
 import torch
-from torch.utils.data import Dataset
-from torchvision import transforms
 import torchvision.transforms.functional as TF
 from PIL import Image
+from torch import Tensor
+from torch.utils.data import Dataset
+from torchvision import transforms
 
 from src.draw_utils import save_img_with_kps
 from src.readers.image_reader import ImageReader
-from typing import Dict
-from torch import Tensor
-from typing import Tuple
 
 
 class Phase0PointsDataset(Dataset):

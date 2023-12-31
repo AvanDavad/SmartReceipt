@@ -1,11 +1,11 @@
-from src.readers.char_reader import CharReader
-from src.readers.image_reader import ImageReader
-
-
 import tempfile
 import unittest
 from pathlib import Path
+
 import numpy as np
+
+from src.readers.char_reader import CharReader
+from src.readers.image_reader import ImageReader
 
 
 class TestCharReader(unittest.TestCase):

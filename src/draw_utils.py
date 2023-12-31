@@ -1,8 +1,13 @@
-from typing import List, Optional, Tuple, Union
-from PIL import Image, ImageDraw
-from PIL import ImageFont
-import numpy as np
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
+
 import cv2
+import numpy as np
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
 
 
 def put_stuffs_on_img(

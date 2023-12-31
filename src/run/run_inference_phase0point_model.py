@@ -4,10 +4,10 @@ python -m src.run.run_inference_phase0point_model \
     --ckpt_name resnet-epoch=00-val_loss=0.00000
 
 """
-
 import argparse
-from src.models.phase0points_model import CNNModulePhase0Points
 from pathlib import Path
+
+from src.models.phase0points_model import CNNModulePhase0Points
 
 PROJ_DIR = Path(__file__).parent.parent.parent
 LIGHTNING_LOGS = (

@@ -1,11 +1,12 @@
-from src.datasets.phase0points_dataset import Phase0PointsDataset
-from src.readers.image_reader import ImageReader
-
-import torch
 import tempfile
 import unittest
 from pathlib import Path
+
+import torch
 from PIL import Image
+
+from src.datasets.phase0points_dataset import Phase0PointsDataset
+from src.readers.image_reader import ImageReader
 
 
 class TestPhase0PointsDataset(unittest.TestCase):

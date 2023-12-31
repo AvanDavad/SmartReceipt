@@ -1,12 +1,12 @@
 """
 python3 -m src.run.run_visualize_phase2char_dataset
 """
-
 import argparse
+import sys
 from pathlib import Path
+
 from src.datasets.phase2char_border_dataset import Phase2CharBorderDataset
 from src.readers.char_reader import CharReader
-import sys
 
 PROJ_DIR = Path(__file__).parents[2]
 

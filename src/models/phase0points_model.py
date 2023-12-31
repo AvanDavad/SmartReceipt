@@ -1,13 +1,13 @@
+from pathlib import Path
+
 import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from PIL import Image, ImageDraw
+from PIL import Image
+from PIL import ImageDraw
 
-
-from pathlib import Path
 from src.datasets.phase0points_dataset import Phase0PointsDataset
-
 from src.visualization.font import get_font
 
 

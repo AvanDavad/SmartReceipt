@@ -1,12 +1,14 @@
 import argparse
-from pytorch_lightning import Trainer
-from src.readers.image_reader import ImageReader
-from src.models import CNNModuleLineDetection
-from src.line_dataset import LineDataset
-from torch.utils.data import DataLoader
-from pathlib import Path
-from pytorch_lightning.callbacks import ModelCheckpoint
 import time
+from pathlib import Path
+
+from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import ModelCheckpoint
+from torch.utils.data import DataLoader
+
+from src.line_dataset import LineDataset
+from src.models import CNNModuleLineDetection
+from src.readers.image_reader import ImageReader
 
 
 def main(args):

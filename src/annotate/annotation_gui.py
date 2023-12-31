@@ -1,19 +1,20 @@
-from pathlib import Path
-from src.annotate.phase_handlers import (
-    PHASE_1_NUM_KEYPOINTS,
-    Phase0Handler,
-    Phase1Handler,
-    Phase2Handler,
-    Phase3Handler,
-)
+import json
 import sys
+import tkinter as tk
+from pathlib import Path
+from tkinter import filedialog
+from tkinter import ttk
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageTk
-import json
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageTk
 
-import tkinter as tk
-from tkinter import filedialog, ttk
+from src.annotate.phase_handlers import Phase0Handler
+from src.annotate.phase_handlers import Phase1Handler
+from src.annotate.phase_handlers import Phase2Handler
+from src.annotate.phase_handlers import Phase3Handler
+from src.annotate.phase_handlers import PHASE_1_NUM_KEYPOINTS
 
 CANVAS_W = 800
 CANVAS_H = 600

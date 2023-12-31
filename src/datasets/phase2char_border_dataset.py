@@ -1,14 +1,15 @@
 from pathlib import Path
 from typing import Dict
-from src.draw_utils import draw_text_on_image, draw_vertical_line
 
 import numpy as np
 import torch
+from PIL import Image
 from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision import transforms
-from PIL import Image
 
+from src.draw_utils import draw_text_on_image
+from src.draw_utils import draw_vertical_line
 from src.readers.char_reader import CharReader
 
 

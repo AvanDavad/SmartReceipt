@@ -1,19 +1,15 @@
-import matplotlib.pyplot as plt
-from PIL import Image
-
-
 import json
-from pathlib import Path
-
-import numpy as np
-import cv2
-
 from dataclasses import dataclass
-
-from typing import Optional
-from typing import Union
+from pathlib import Path
 from typing import List
+from typing import Optional
 from typing import Tuple
+from typing import Union
+
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
 
 
 @dataclass

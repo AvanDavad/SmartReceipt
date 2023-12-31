@@ -1,12 +1,14 @@
 import argparse
+import time
+from pathlib import Path
+
 from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import ModelCheckpoint
+from torch.utils.data import DataLoader
+
 from src.datasets.phase2_single_char_dataset import Phase2SingleCharDataset
 from src.models.phase2_single_char_model import CNNModulePhase2SingleChar
 from src.readers.char_reader import CharReader
-from torch.utils.data import DataLoader
-from pathlib import Path
-from pytorch_lightning.callbacks import ModelCheckpoint
-import time
 
 PROJ_DIR = Path(__file__).parents[2]
 

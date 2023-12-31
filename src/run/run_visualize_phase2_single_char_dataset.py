@@ -1,8 +1,9 @@
 import argparse
+import sys
 from pathlib import Path
+
 from src.datasets.phase2_single_char_dataset import Phase2SingleCharDataset
 from src.readers.char_reader import CharReader
-import sys
 
 PROJ_DIR = Path(__file__).parents[2]
 
