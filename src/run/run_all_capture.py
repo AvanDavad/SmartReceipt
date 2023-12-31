@@ -9,38 +9,39 @@ from PIL import ImageDraw
 
 from src.datasets.phase0points_dataset import Phase0PointsDataset
 from src.models.phase0points_model import CNNModulePhase0Points
+from src.run.run_all import get_best_ckpt_path
 from src.visualization.font import get_font
 
-PROJ_DIR = Path(__file__).parent
-LIGHTNING_LOGS = (
-    PROJ_DIR / "model_checkpoints" / "CNNModulePhase0Points" / "lightning_logs"
-)
+PROJ_DIR = Path(__file__).parents[2]
+
+
+def make_square_by_cropping(img: Image.Image) -> Image.Image:
+    w, h = img.size
+    if w == h:
+        return img
+    elif w > h:
+        margin = (w - h) // 2
+        return img.crop((margin, 0, w - margin, h))
+    else:
+        margin = (h - w) // 2
+        return img.crop((0, margin, w, h - margin))
 
 
 def main(args):
-    ckpt_path = (
-        LIGHTNING_LOGS
-        / f"version_{args.version_num}"
-        / "checkpoints"
-        / f"{args.ckpt_name}.ckpt"
+    ckpt_path = get_best_ckpt_path(
+        PROJ_DIR / "model_checkpoints" / "CNNModulePhase0Points"
     )
     model = CNNModulePhase0Points().load_from_checkpoint(ckpt_path)
+    print(f"Loading phase0 point model from {ckpt_path}")
 
     video = cv2.VideoCapture(0)
 
-    a = 0
-
     while True:
-        a = a + 1
-
-        check, frame = video.read()
-
-        h, w, _ = frame.shape
-        left = (w - h) // 2
-        right = w - left
-        frame = frame[:, left:right, :]
-
+        _, frame = video.read()
         img = Image.fromarray(frame)
+        img = make_square_by_cropping(img)
+        assert img.width == img.height
+
         img_tensor = Phase0PointsDataset.TRANSFORMS(img)
         img_tensor = img_tensor.unsqueeze(0)
 
@@ -58,7 +59,7 @@ def main(args):
                 int(img.height * pred_kps[2 * i + 1]),
             )
             keypoints.append(kpt)
-            circle_radius = 20
+            circle_radius = 10
             circle_color = "blue"
             draw.ellipse(
                 (
@@ -91,25 +92,17 @@ def main(args):
 
         cv2.imshow("Capturing", np.array(img))
 
-        key = cv2.waitKey(1)
-        if key == 27:
+        key = cv2.waitKey(100)
+        if key != -1:
+            print(key)
+        if key == 13:  # Enter key
             break
-        else:
-            # cv2.imshow("Please press the escape(esc) key to stop the video",
-            # frame)
-            pass
-
-    print(a)
 
     video.release()
 
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
-    argparser.add_argument("--version_num", type=int, default=0)
-    argparser.add_argument(
-        "--ckpt_name", type=str, default="resnet-epoch=00-val_loss=0.00000"
-    )
 
     args = argparser.parse_args()
     main(args)
