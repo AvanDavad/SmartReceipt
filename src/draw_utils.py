@@ -16,7 +16,7 @@ def put_stuffs_on_img(
     pts_normalized: bool = False,
     pts_radius: Union[int, List[int]] = 5,
     pts_colors: Union[str, List[str]] = "blue",
-    lines: Optional[List[Tuple[int]]] = None,
+    lines: Optional[List[Tuple[int, int, int, int]]] = None,
     lines_width: Union[int, List[int]] = 5,
     lines_colors: Union[str, List[str]] = "red",
 ):
@@ -206,7 +206,7 @@ def draw_borders(img: Image.Image, offset_list: List[int]) -> Image.Image:
 
 
 def draw_borders_with_chars_and_probs(
-    img: Image.Image, offset_list: List[int], chars: str, probs: List[float]
+    img: Image.Image, offset_list: List[float], chars: str, probs: List[float]
 ) -> Image.Image:
     assert len(offset_list) == len(chars)
     assert len(offset_list) == len(probs)

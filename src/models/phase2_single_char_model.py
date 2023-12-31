@@ -85,6 +85,9 @@ class CNNModulePhase2SingleChar(pl.LightningModule):
         self.training_step_outputs = []
         self.validation_step_outputs = []
 
+        self.learning_rate = 1e-3
+        self.weight_decay = 1e-5
+
     def forward(
         self, batch: Dict[str, Tensor]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -99,7 +102,7 @@ class CNNModulePhase2SingleChar(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(
-            self.parameters(), lr=2e-4, weight_decay=1e-5
+            self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay
         )
         return optimizer
 

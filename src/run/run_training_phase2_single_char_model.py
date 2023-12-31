@@ -50,7 +50,7 @@ def main(args):
         )
         model = CNNModulePhase2SingleChar().load_from_checkpoint(ckpt_path)
         print(f"model initialized from {ckpt_path}")
-    model.lr = args.lr
+    model.learning_rate = args.lr
     model.weight_decay = args.weight_decay
 
     checkpoint_callback = ModelCheckpoint(

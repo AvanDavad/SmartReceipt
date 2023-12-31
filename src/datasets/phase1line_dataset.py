@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 import torch
 from PIL import Image
@@ -97,7 +99,7 @@ class Phase1LineDataset(Dataset):
 
         filename = out_folder / f"sample_{idx}_{repeat_idx}.jpg"
         color = "red" if (is_last.item() == 1.0) else "yellow"
-        line = (
+        line: Tuple[int, int, int, int] = (
             0,
             int(line_y.item() * img.width),
             img.width,

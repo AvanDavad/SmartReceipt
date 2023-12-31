@@ -28,6 +28,7 @@ class Sample:
         self_msg = self_msg + f"\n\tphase_0_image {self.phase_0_image.size}"
         self_msg = self_msg + f"\n\tphase_0_points {self.phase_0_points.shape}"
         if self.phase_1_image is not None:
+            assert self.phase_1_lines is not None
             self_msg = self_msg + f"\n\tphase_1_image {self.phase_1_image.size}"
             self_msg = (
                 self_msg + f"\n\tphase_1_lines {self.phase_1_lines.shape}"
