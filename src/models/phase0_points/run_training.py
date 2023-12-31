@@ -8,11 +8,13 @@ from torch.utils.data import DataLoader
 
 from src.datasets.phase0points_dataset import Phase0PointsDataset
 from src.models.phase0_points.points_model import CNNModulePhase0Points
+from src.path_utils import get_best_ckpt_path
 from src.readers.image_reader import ImageReader
-from src.run.run_all import get_best_ckpt_path
 
-PROJ_DIR = Path(__file__).parents[2]
+PROJ_DIR = Path(__file__).parents[3]
 MODEL_CHECKPOINTS = PROJ_DIR / "model_checkpoints" / "CNNModulePhase0Points"
+assert MODEL_CHECKPOINTS.is_dir(), MODEL_CHECKPOINTS
+
 
 def main(args):
     train_reader = ImageReader(args.train_data)
@@ -75,10 +77,19 @@ if __name__ == "__main__":
         default=str(PROJ_DIR / "data" / "val"),
         help="path to validation data",
     )
-    parser.add_argument("--from_scratch", action="store_true", help="train from scratch")
-    parser.add_argument("--version_num", type=int, default=-1, help="continue training from this version")
+    parser.add_argument(
+        "--from_scratch", action="store_true", help="train from scratch"
+    )
+    parser.add_argument(
+        "--version_num",
+        type=int,
+        default=-1,
+        help="continue training from this version",
+    )
     parser.add_argument("--batch_size", type=int, default=32, help="batch size")
-    parser.add_argument("--max_epochs", type=int, default=1000, help="max epochs")
+    parser.add_argument(
+        "--max_epochs", type=int, default=1000, help="max epochs"
+    )
 
     args = parser.parse_args()
 
