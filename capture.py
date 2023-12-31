@@ -95,7 +95,9 @@ def main(args):
         if key == 27:
             break
         else:
-            pass  # cv2.imshow("Please press the escape(esc) key to stop the video", frame)
+            # cv2.imshow("Please press the escape(esc) key to stop the video",
+            # frame)
+            pass
 
     print(a)
 

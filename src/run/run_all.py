@@ -21,7 +21,7 @@ PROJ_DIR = Path(__file__).parents[2]
 def get_val_loss_from_ckpt_path(ckpt_path):
     try:
         val_loss = float(ckpt_path.stem.split("=")[-1])
-    except:
+    except Exception:
         val_loss = np.inf
     return val_loss
 

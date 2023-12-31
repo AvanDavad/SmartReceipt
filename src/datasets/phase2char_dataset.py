@@ -14,7 +14,10 @@ from src.draw_utils import draw_vertical_line
 from src.readers.char_reader import CharReader
 
 
-ALL_CHARS = "0123456789aábcdeéfghiíjklmnoóöőpqrstuúüűvwxyzAÁBCDEÉFGHIÍJKLMNOÓÖŐPQRSTUÚÜŰVWXYZ!#%()*+,-./:;<=>?[]_{|}~ "
+ALL_CHARS = (
+    "0123456789aábcdeéfghiíjklmnoóöőpqrstuúüűvwxyz"
+    "AÁBCDEÉFGHIÍJKLMNOÓÖŐPQRSTUÚÜŰVWXYZ!#%()*+,-./:;<=>?[]_{|}~ "
+)
 
 
 class Phase2CharDataset(Dataset):

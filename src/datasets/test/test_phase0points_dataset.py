@@ -44,7 +44,7 @@ class TestPhase0PointsDatasetAugment(unittest.TestCase):
         self.img = sample.phase_0_image
         self.kps = torch.tensor(sample.phase_0_points).to(dtype=torch.float32)
 
-    def test_crop_augment(self):
+    def test_color_augment(self):
         img, kps = Phase0PointsDataset.color_augment(self.img, self.kps)
         assert isinstance(img, Image.Image)
         assert isinstance(kps, torch.Tensor)

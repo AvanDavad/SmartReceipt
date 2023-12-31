@@ -52,10 +52,14 @@ def warp_perspective(img, transformation_matrix, dest_size_wh):
 def warp_perspective_with_nonlin_least_squares(
     img, img_pts, camera_matrix, dist_coeffs, scale_factor=10.0, verbose=True
 ):
+    msg = (
+        f"img_pts.shape is {img_pts.shape}, "
+        f"expected ({PHASE_1_NUM_KEYPOINTS}, 2)"
+    )
     assert img_pts.shape == (
         PHASE_1_NUM_KEYPOINTS,
         2,
-    ), f"img_pts.shape is {img_pts.shape}, expected ({PHASE_1_NUM_KEYPOINTS}, 2)"
+    ), msg
 
     for x0 in X0_LIST:
         print(f"Trying x0: {x0}")

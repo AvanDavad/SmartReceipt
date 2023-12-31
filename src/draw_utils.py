@@ -83,9 +83,11 @@ def put_stuffs_on_img(
         if isinstance(lines_colors, str):
             lines_colors = [lines_colors] * len(lines)
         elif isinstance(lines_colors, list):
-            assert len(lines_colors) == len(
-                lines
-            ), f"len(lines_colors) is {len(lines_colors)}, expected {len(lines)}"
+            msg = (
+                f"len(lines_colors) is {len(lines_colors)},"
+                f" expected {len(lines)}"
+            )
+            assert len(lines_colors) == len(lines), msg
         else:
             raise ValueError(
                 f"lines_colors is {lines_colors}, expected str or list"
