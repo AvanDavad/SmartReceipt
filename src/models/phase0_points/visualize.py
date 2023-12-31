@@ -1,12 +1,24 @@
-from typing import List, Tuple, Union
+from typing import List
+from typing import Tuple
+from typing import Union
+
+import numpy as np
 from PIL import Image
 from PIL import ImageDraw
-import numpy as np
 
 from src.visualization.font import get_font
 
-def inference_and_visualize(self, img: Image.Image, pred_kps: List[Tuple], line_width: int = 5, circle_radius: int = 10, circle_color: str = "blue", font_size: int = 25, font_color: str = "black") -> Union[Image.Image, np.ndarray]:
 
+def inference_and_visualize(
+    self,
+    img: Image.Image,
+    pred_kps: List[Tuple],
+    line_width: int = 5,
+    circle_radius: int = 10,
+    circle_color: str = "blue",
+    font_size: int = 25,
+    font_color: str = "black",
+) -> Union[Image.Image, np.ndarray]:
     img = img.copy()
     draw = ImageDraw.Draw(img)
 

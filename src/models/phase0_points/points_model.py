@@ -1,13 +1,15 @@
+from typing import List
+from typing import Tuple
+from typing import Union
+
 import numpy as np
 import pytorch_lightning as pl
 import torch
-from PIL import Image, ImageDraw
-from torch import Tensor
-from typing import List, Tuple, Union
 import torch.nn as nn
+from PIL import Image
+from torch import Tensor
 
 from src.datasets.phase0points_dataset import Phase0PointsDataset
-from src.visualization.font import get_font
 
 
 class Phase0PointsBackbone(nn.Module):
@@ -219,11 +221,18 @@ class CNNModulePhase0Points(pl.LightningModule):
         return x
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        optimizer = torch.optim.Adam(
+            self.parameters(),
+            lr=self.learning_rate,
+            weight_decay=self.weight_decay,
+        )
         return optimizer
 
     def _loss(self, kps_gt, kps_pred):
-        loss = torch.mean((kps_gt - kps_pred) ** 2) * self.L2_weight + torch.mean(torch.abs(kps_gt - kps_pred)) * self.L1_weight
+        loss = (
+            torch.mean((kps_gt - kps_pred) ** 2) * self.L2_weight
+            + torch.mean(torch.abs(kps_gt - kps_pred)) * self.L1_weight
+        )
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -246,7 +255,12 @@ class CNNModulePhase0Points(pl.LightningModule):
 
         return loss
 
-    def inference(self, img: Image.Image, as_int: bool = False, to_tuple_list: bool = False) -> Union[np.ndarray, List[Tuple]]:
+    def inference(
+        self,
+        img: Image.Image,
+        as_int: bool = False,
+        to_tuple_list: bool = False,
+    ) -> Union[np.ndarray, List[Tuple]]:
         img_tensor: Tensor = Phase0PointsDataset.TRANSFORMS(img)
         img_tensor = img_tensor.unsqueeze(0)
 
