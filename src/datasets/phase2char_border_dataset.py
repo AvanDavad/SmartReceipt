@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 from src.draw_utils import draw_text_on_image, draw_vertical_line
 
 import numpy as np

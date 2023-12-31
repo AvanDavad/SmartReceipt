@@ -1,10 +1,7 @@
 import argparse
-from src.draw_utils import draw_borders, draw_borders_with_chars_and_probs
+from src.draw_utils import draw_borders_with_chars_and_probs
 from src.models.phase2_single_char_model import CNNModulePhase2SingleChar
 from src.models.phase2char_border_model import CNNModulePhase2CharsBorder
-from src.readers.image_reader import ImageReader
-from src.models.phase0points_model import CNNModulePhase0Points
-from src.datasets.phase0points_dataset import Phase0PointsDataset
 from pathlib import Path
 from PIL import Image
 

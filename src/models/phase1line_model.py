@@ -170,17 +170,14 @@ class CNNModulePhase1Line(pl.LightningModule):
 
     def inference(self, img: Image.Image, out_folder:Optional[Path]=None, prefix="2_lines", max_num_lines=50) -> List[Image.Image]:
         self.eval()
-        is_last = False
         line_img_list: List[Image.Image] = []
         offset_y = 0
         offset_y_list = []
         idx = 0
 
-        while not is_last:
-            if offset_y >= img.height:
-                break
+        while offset_y < img.height:
 
-            line_y, is_last, is_last_prob = self.inference_1(img, offset_y=offset_y)
+            line_y, _, is_last_prob = self.inference_1(img, offset_y=offset_y)
 
             print(f"line pred. line_y: {line_y}, is_last: {is_last_prob:.3f}")
 
@@ -192,7 +189,7 @@ class CNNModulePhase1Line(pl.LightningModule):
 
             idx += 1
             if idx >= max_num_lines:
-                is_last = True
+                pass
 
         if out_folder is not None:
 

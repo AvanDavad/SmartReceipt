@@ -1,7 +1,6 @@
 import argparse
 from pathlib import Path
 from src.readers.image_reader import ImageReader
-import time
 import numpy as np
 from src.run.run_visualize_image_reader import remove_dir_with_all_contents
 import json

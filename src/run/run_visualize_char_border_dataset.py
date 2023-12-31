@@ -6,7 +6,6 @@ import argparse
 from pathlib import Path
 from src.datasets.phase2char_border_dataset import Phase2CharBorderDataset
 from src.readers.char_reader import CharReader
-from src.readers.image_reader import ImageReader
 import sys
 
 PROJ_DIR = Path(__file__).parents[2]

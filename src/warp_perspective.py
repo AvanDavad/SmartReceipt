@@ -1,8 +1,6 @@
 import numpy as np
 import cv2
 from PIL import Image
-from pathlib import Path
-import json
 from scipy.optimize import least_squares
 
 np.set_printoptions(suppress=True, precision=3)
@@ -76,7 +74,7 @@ def warp_perspective_with_nonlin_least_squares(
     dst += np.array([5.0, 5.0]) * scale_factor
 
     dst_width = int(dst[:, 0].max() + 5 * scale_factor)
-    dst_height = int(dst[:, 1].max() + 20 * scale_factor)
+    dst_height = int(dst[:, 1].max() + 50 * scale_factor)
 
     M = cv2.getPerspectiveTransform(img_pts[:, 0, :].astype(np.float32), dst)
 

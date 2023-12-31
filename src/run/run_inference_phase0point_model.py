@@ -6,9 +6,7 @@ python -m src.run.run_inference_phase0point_model \
 """
 
 import argparse
-from src.readers.image_reader import ImageReader
 from src.models.phase0points_model import CNNModulePhase0Points
-from src.datasets.phase0points_dataset import Phase0PointsDataset
 from pathlib import Path
 
 PROJ_DIR = Path(__file__).parent.parent.parent

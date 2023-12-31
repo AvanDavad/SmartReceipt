@@ -1,8 +1,6 @@
 import argparse
 from pathlib import Path
 from src.readers.char_reader import CharReader
-from src.readers.image_reader import ImageReader
-import time
 
 from src.run.run_visualize_image_reader import remove_dir_with_all_contents
 

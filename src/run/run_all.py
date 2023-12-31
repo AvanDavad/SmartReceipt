@@ -9,7 +9,6 @@ from src.models.phase0points_model import CNNModulePhase0Points
 from src.models.phase1line_model import CNNModulePhase1Line
 from src.models.phase2_single_char_model import CNNModulePhase2SingleChar
 from src.models.phase2char_border_model import CNNModulePhase2CharsBorder
-from src.models.phase2char_models import CNNModulePhase2Chars
 from src.warp_perspective import warp_perspective_with_nonlin_least_squares
 
 

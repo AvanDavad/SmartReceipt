@@ -1,5 +1,4 @@
 import cv2
-from PIL import Image
 
 
 img = cv2.imread("images/receipts/IMG_5447.JPG")

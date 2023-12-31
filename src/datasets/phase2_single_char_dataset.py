@@ -1,7 +1,7 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 from src.datasets.phase2char_dataset import ALL_CHARS
-from src.draw_utils import draw_text_on_image, draw_vertical_line
+from src.draw_utils import draw_text_on_image
 
 import numpy as np
 import torch

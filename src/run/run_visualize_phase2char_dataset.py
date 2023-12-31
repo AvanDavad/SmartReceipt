@@ -4,10 +4,8 @@ python3 -m src.run.run_visualize_phase2char_dataset
 
 import argparse
 from pathlib import Path
-from src.datasets.phase1line_dataset import Phase1LineDataset
 from src.datasets.phase2char_dataset import Phase2CharDataset
 from src.readers.char_reader import CharReader
-from src.readers.image_reader import ImageReader
 import sys
 
 PROJ_DIR = Path(__file__).parents[2]

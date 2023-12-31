@@ -1,16 +1,12 @@
-from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict, Tuple
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 from src.datasets.phase2char_border_dataset import Phase2CharBorderDataset
-from src.datasets.phase2char_dataset import Phase2CharDataset
-from src.datasets.phase2char_dataset import ALL_CHARS
 from torch import Tensor
 from PIL import Image
 from typing import List
 
-from src.draw_utils import draw_for_char_recognition
 
 class CNNBackbone(nn.Module):
     def __init__(self):

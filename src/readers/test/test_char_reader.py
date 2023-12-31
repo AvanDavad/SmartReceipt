@@ -17,7 +17,7 @@ class TestCharReader(unittest.TestCase):
         assert len(self.char_reader) == 177
 
     def test_get(self):
-        sample = self.char_reader[0]
+        self.char_reader[0]
 
     def test_show(self):
         with tempfile.TemporaryDirectory() as tempdir:

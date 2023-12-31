@@ -7,9 +7,7 @@ import json
 from pathlib import Path
 
 import numpy as np
-import cv2
 from typing import Tuple
-from src.readers.image_reader import ImageReader
 
 from dataclasses import dataclass
 
