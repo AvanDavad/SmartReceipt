@@ -1,11 +1,10 @@
-from pathlib import Path
-
 import numpy as np
 import pytorch_lightning as pl
 import torch
+from PIL import Image, ImageDraw
+from torch import Tensor
+from typing import List, Tuple, Union
 import torch.nn as nn
-from PIL import Image
-from PIL import ImageDraw
 
 from src.datasets.phase0points_dataset import Phase0PointsDataset
 from src.visualization.font import get_font
@@ -207,6 +206,12 @@ class CNNModulePhase0Points(pl.LightningModule):
 
         self.fc = nn.Linear(1 * 1 * 32, 8)
 
+        self.learning_rate = 2e-4
+        self.weight_decay = 1e-5
+
+        self.L2_weight = 1e5
+        self.L1_weight = 1e3
+
     def forward(self, x):
         x = self.backbone(x)
         x = self.flatten(x)
@@ -214,16 +219,18 @@ class CNNModulePhase0Points(pl.LightningModule):
         return x
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(
-            self.parameters(), lr=2e-4, weight_decay=1e-5
-        )
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
         return optimizer
+
+    def _loss(self, kps_gt, kps_pred):
+        loss = torch.mean((kps_gt - kps_pred) ** 2) * self.L2_weight + torch.mean(torch.abs(kps_gt - kps_pred)) * self.L1_weight
+        return loss
 
     def training_step(self, batch, batch_idx):
         inp_img, kps = batch
         kps_pred = self(inp_img)
 
-        loss = torch.mean((kps - kps_pred) ** 2) * 1e5
+        loss = self._loss(kps, kps_pred)
 
         self.log("train_loss", loss, prog_bar=True)
 
@@ -233,63 +240,29 @@ class CNNModulePhase0Points(pl.LightningModule):
         inp_img, kps = batch
         kps_pred = self(inp_img)
 
-        loss = torch.mean((kps - kps_pred) ** 2) * 1e5
+        loss = self._loss(kps, kps_pred)
 
         self.log("val_loss", loss, prog_bar=True)
 
-    def inference(self, img_path, out_folder=Path(""), prefix="inference"):
-        img = Image.open(img_path)
-        img_tensor = Phase0PointsDataset.TRANSFORMS(img)
+        return loss
+
+    def inference(self, img: Image.Image, as_int: bool = False, to_tuple_list: bool = False) -> Union[np.ndarray, List[Tuple]]:
+        img_tensor: Tensor = Phase0PointsDataset.TRANSFORMS(img)
         img_tensor = img_tensor.unsqueeze(0)
 
         self.eval()
         with torch.no_grad():
-            pred_kps = self(img_tensor)
-        pred_kps = pred_kps.detach().cpu().numpy()[0]
+            pred_kps: Tensor = self(img_tensor)
 
-        draw = ImageDraw.Draw(img)
+        pred_kps_np: np.ndarray = pred_kps.detach().cpu().numpy()[0]
+        pred_kps_np = pred_kps_np.reshape(-1, 2)
+        pred_kps_np *= np.array([img.width, img.height])
 
-        keypoints = []
-        for i in range(pred_kps.shape[0] // 2):
-            kpt = (
-                int(img.width * pred_kps[2 * i]),
-                int(img.height * pred_kps[2 * i + 1]),
-            )
-            keypoints.append(kpt)
-            circle_radius = 20
-            circle_color = "blue"
-            draw.ellipse(
-                (
-                    kpt[0] - circle_radius,
-                    kpt[1] - circle_radius,
-                    kpt[0] + circle_radius,
-                    kpt[1] + circle_radius,
-                ),
-                fill=circle_color,
-            )
+        if as_int:
+            pred_kps_np = pred_kps_np.astype(int)
 
-            # Draw text
-            text = f"kpt_{i+1}"
-            font_size = 100
-            text_color = "black"
-            font = get_font(font_size)
-            text_position = kpt
-            draw.text(text_position, text, fill=text_color, font=font)
+        if to_tuple_list:
+            pred_kps_tup = [(x[0], x[1]) for x in pred_kps_np]
+            return pred_kps_tup
 
-        for i0, i1, col in [
-            (0, 1, "red"),
-            (0, 2, "red"),
-            (1, 3, "red"),
-            (2, 3, "yellow"),
-        ]:
-            start_point = keypoints[i0]
-            end_point = keypoints[i1]
-            line_width = 5
-            draw.line((start_point, end_point), fill=col, width=line_width)
-
-        # Save the image to a file
-        prefix = f"{prefix}_" if prefix else ""
-        filename = out_folder / f"{prefix}{img_path.stem}.jpg"
-        img.save(filename)
-        print(f"saved {filename}")
-        return np.array(keypoints).astype(np.float64)
+        return pred_kps_np
