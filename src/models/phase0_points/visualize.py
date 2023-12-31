@@ -1,16 +1,13 @@
 from typing import List
 from typing import Tuple
-from typing import Union
 
-import numpy as np
 from PIL import Image
 from PIL import ImageDraw
 
 from src.visualization.font import get_font
 
 
-def inference_and_visualize(
-    self,
+def visualize_phase0_points(
     img: Image.Image,
     pred_kps: List[Tuple],
     line_width: int = 5,
@@ -18,7 +15,7 @@ def inference_and_visualize(
     circle_color: str = "blue",
     font_size: int = 25,
     font_color: str = "black",
-) -> Union[Image.Image, np.ndarray]:
+) -> Image.Image:
     img = img.copy()
     draw = ImageDraw.Draw(img)
 
@@ -47,4 +44,4 @@ def inference_and_visualize(
         end_point = pred_kps[i1]
         draw.line((start_point, end_point), fill=col, width=line_width)
 
-    return img, pred_kps
+    return img
