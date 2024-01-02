@@ -4,23 +4,22 @@ from pathlib import Path
 
 import numpy as np
 
-from src.readers.char_reader import CharReader
-from src.readers.image_reader import ImageReader
+from src.readers.char_reader import CharReader, CharSample
 
 
 class TestCharReader(unittest.TestCase):
     def setUp(self):
         rootdir = (
-            Path(__file__).parent.parent.parent.parent / "test_data" / "train"
+            Path(__file__).parents[3] / "test_data" / "train"
         )
-        self.image_reader = ImageReader(rootdir)
-        self.char_reader = CharReader(self.image_reader)
+        self.char_reader = CharReader(rootdir)
 
     def test_reader_len(self):
-        assert len(self.char_reader) == 177
+        assert len(self.char_reader) == 176
 
     def test_get(self):
-        self.char_reader[0]
+        s = self.char_reader[0]
+        assert isinstance(s, CharSample)
 
     def test_show(self):
         with tempfile.TemporaryDirectory() as tempdir:

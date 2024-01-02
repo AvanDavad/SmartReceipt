@@ -41,7 +41,7 @@ class CharSample:
 class CharReader:
     def __init__(self, root_dir: Path, w: int = 5):
         self.root_dir = root_dir / "char_reader"
-        assert self.root_dir.is_dir()
+        assert self.root_dir.is_dir(), f"{self.root_dir} is not a directory"
 
         self._w = w
 
