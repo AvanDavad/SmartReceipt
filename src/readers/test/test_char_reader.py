@@ -4,14 +4,13 @@ from pathlib import Path
 
 import numpy as np
 
-from src.readers.char_reader import CharReader, CharSample
+from src.readers.char_reader import CharReader
+from src.readers.char_reader import CharSample
 
 
 class TestCharReader(unittest.TestCase):
     def setUp(self):
-        rootdir = (
-            Path(__file__).parents[3] / "test_data" / "train"
-        )
+        rootdir = Path(__file__).parents[3] / "test_data" / "train"
         self.char_reader = CharReader(rootdir)
 
     def test_reader_len(self):

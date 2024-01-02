@@ -3,14 +3,13 @@ import json
 from pathlib import Path
 
 import numpy as np
-from src.readers.char_reader import CharReader
 
+from src.readers.char_reader import CharReader
 from src.readers.image_reader import ImageReader
 from src.run.run_visualize_image_reader import remove_dir_with_all_contents
 
 
 def main(args):
-
     out_folder = Path(args.rootdir) / "char_reader"
 
     reader = CharReader(Path(args.rootdir))
