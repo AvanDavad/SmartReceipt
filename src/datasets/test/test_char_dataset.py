@@ -6,18 +6,14 @@ import torch
 
 from src.datasets.phase2char_dataset import Phase2CharDataset
 from src.readers.char_reader import CharReader
-from src.readers.image_reader import ImageReader
 
 
 class TestCharDataset(unittest.TestCase):
     def setUp(self):
-        rootdir = (
-            Path(__file__).parent.parent.parent.parent / "test_data" / "train"
-        )
-        self.image_reader = ImageReader(rootdir)
+        rootdir = Path(__file__).parents[3] / "test_data" / "train"
 
         self.w = 2
-        self.char_reader = CharReader(self.image_reader, w=self.w)
+        self.char_reader = CharReader(rootdir, w=self.w)
         self.dataset = Phase2CharDataset(
             self.char_reader,
             augment=False,

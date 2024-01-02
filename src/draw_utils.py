@@ -125,15 +125,14 @@ def draw_vertical_line(
     return img
 
 
-def save_img_with_kps(
+def draw_img_with_kps_for_phase0(
     img: Image.Image,
-    kps,
-    filename,
-    normalized=False,
-    circle_radius=5,
-    circle_color="blue",
-    verbose: bool = False,
-):
+    kps: np.ndarray,
+    normalized: bool = False,
+    circle_radius: int = 5,
+    circle_color: str = "blue",
+    lines: List[Tuple[int, int]] = [(0, 1), (1, 3), (0, 2), (2, 3)],
+) -> Image.Image:
     img = img.copy()
     draw = ImageDraw.Draw(img)
 
@@ -155,6 +154,34 @@ def save_img_with_kps(
             ),
             fill=circle_color,
         )
+
+    for line in lines:
+        draw.line(
+            (
+                kps[line[0], 0],
+                kps[line[0], 1],
+                kps[line[1], 0],
+                kps[line[1], 1],
+            ),
+            fill=circle_color,
+            width=2,
+        )
+
+    return img
+
+
+def save_img_with_kps(
+    img: Image.Image,
+    kps,
+    filename,
+    normalized=False,
+    circle_radius=5,
+    circle_color="blue",
+    verbose: bool = False,
+):
+    img = draw_img_with_kps_for_phase0(
+        img, kps, normalized, circle_radius, circle_color
+    )
 
     img.save(filename)
     if verbose:

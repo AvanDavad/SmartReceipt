@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Dict
 from typing import Tuple
 
@@ -10,7 +9,7 @@ from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision import transforms
 
-from src.draw_utils import save_img_with_kps
+from src.draw_utils import draw_img_with_kps_for_phase0
 from src.readers.image_reader import ImageReader
 
 
@@ -26,10 +25,23 @@ class Phase0PointsDataset(Dataset):
         ]
     )
 
-    def __init__(self, reader: ImageReader, augment: bool = False):
+    def __init__(
+        self,
+        reader: ImageReader,
+        augment: bool = False,
+        color_augment_prob: float = 0.5,
+        rotate_augment_prob: float = 0.5,
+        perspective_augment_prob: float = 0.5,
+        crop_augment_prob: float = 0.5,
+    ):
         assert isinstance(reader, ImageReader)
         self.reader = reader
         self.augment = augment
+
+        self.color_augment_prob = color_augment_prob
+        self.rotate_augment_prob = rotate_augment_prob
+        self.perspective_augment_prob = perspective_augment_prob
+        self.crop_augment_prob = crop_augment_prob
 
     def __len__(self):
         return len(self.reader)
@@ -41,16 +53,16 @@ class Phase0PointsDataset(Dataset):
         kps = torch.tensor(sample.phase_0_points).to(dtype=torch.float32)
 
         if self.augment:
-            if np.random.rand() < 0.5:
+            if np.random.rand() < self.color_augment_prob:
                 img, kps = Phase0PointsDataset.color_augment(img, kps)
 
-            if np.random.rand() < 0.5:
+            if np.random.rand() < self.rotate_augment_prob:
                 img, kps = Phase0PointsDataset.rotate(img, kps)
 
-            if np.random.rand() < 0.5:
+            if np.random.rand() < self.perspective_augment_prob:
                 img, kps = Phase0PointsDataset.perspective_augment(img, kps)
 
-            if np.random.rand() < 0.5:
+            if np.random.rand() < self.crop_augment_prob:
                 img, kps = Phase0PointsDataset.crop_augment(img, kps)
 
         kps = kps / torch.tensor([img.width, img.height])
@@ -192,15 +204,12 @@ class Phase0PointsDataset(Dataset):
         img = Image.fromarray(img)
         return img
 
-    def show(
-        self, idx: int, out_folder: Path, repeat_idx=0, verbose: bool = False
-    ):
+    def show(self, idx: int) -> Image.Image:
         sample_t = self[idx]
         img_tensor = sample_t["img"]
         kps_tensor = sample_t["kps"]
 
         img = Phase0PointsDataset.img_from_tensor(img_tensor)
         kps = kps_tensor.reshape(-1, 2).numpy() * Phase0PointsDataset.IMG_SIZE
-        filename = out_folder / f"sample_{idx}_{repeat_idx}.jpg"
 
-        save_img_with_kps(img, kps, filename, circle_radius=10, verbose=verbose)
+        return draw_img_with_kps_for_phase0(img, kps, circle_radius=4)

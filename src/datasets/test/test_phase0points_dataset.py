@@ -1,4 +1,3 @@
-import tempfile
 import unittest
 from pathlib import Path
 
@@ -28,15 +27,13 @@ class TestPhase0PointsDataset(unittest.TestCase):
 
     def test_show(self):
         dataset = Phase0PointsDataset(self.image_reader, augment=False)
-        with tempfile.TemporaryDirectory() as tempdir:
-            dataset.show(0, Path(tempdir))
+        img = dataset.show(0)
+        assert isinstance(img, Image.Image)
 
 
 class TestPhase0PointsDatasetAugment(unittest.TestCase):
     def setUp(self):
-        rootdir = (
-            Path(__file__).parent.parent.parent.parent / "test_data" / "train"
-        )
+        rootdir = Path(__file__).parents[3] / "test_data" / "train"
         image_reader = ImageReader(rootdir)
 
         sample = image_reader[0]
