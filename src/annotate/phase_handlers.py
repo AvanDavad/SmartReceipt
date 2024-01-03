@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image
 
 from src.annotate.zoom_handler import ImageZoomHandler
-from src.camera_calib import get_camera_calib
+from src.camera_calib import get_camera_calib, get_default_camera_calib
 from src.visualization.font import get_font
 from src.warp_perspective import warp_perspective
 from src.warp_perspective import warp_perspective_with_nonlin_least_squares
@@ -146,7 +146,7 @@ class Phase1Handler(PhaseHandler):
 
     def _init_ortho(self, M, dest_size_wh):
         if M is None:
-            camera_matrix, dist_coeffs = get_camera_calib()
+            camera_matrix, dist_coeffs = get_default_camera_calib(self.base_img.size)
             ortho_img, _, M = warp_perspective_with_nonlin_least_squares(
                 self.base_img,
                 np.array(self.base_points),
@@ -160,7 +160,7 @@ class Phase1Handler(PhaseHandler):
         return ortho_img, M
 
     @property
-    def base_img(self):
+    def base_img(self) -> Image.Image:
         return self.prev_handler.img
 
     @property
