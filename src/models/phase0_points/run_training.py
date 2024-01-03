@@ -6,12 +6,11 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.utils.data import DataLoader
 
+import wandb
 from src.datasets.phase0points_dataset import Phase0PointsDataset
 from src.models.phase0_points.points_model import CNNModulePhase0Points
 from src.path_utils import get_best_ckpt_path
 from src.readers.image_reader import ImageReader
-
-import wandb
 
 PROJ_DIR = Path(__file__).parents[3]
 MODEL_CHECKPOINTS = PROJ_DIR / "model_checkpoints" / "CNNModulePhase0Points"
@@ -19,7 +18,6 @@ assert MODEL_CHECKPOINTS.is_dir(), MODEL_CHECKPOINTS
 
 
 def main(args):
-
     train_reader = ImageReader(args.train_data)
     val_reader = ImageReader(args.val_data)
 
@@ -43,7 +41,9 @@ def main(args):
     if args.from_scratch:
         model = CNNModulePhase0Points()
     else:
-        ckpt_path = get_best_ckpt_path(MODEL_CHECKPOINTS, args.version_num, is_last=args.last)
+        ckpt_path = get_best_ckpt_path(
+            MODEL_CHECKPOINTS, args.version_num, is_last=args.last
+        )
         print(f"loading from checkpoint: {ckpt_path}")
         model = CNNModulePhase0Points().load_from_checkpoint(ckpt_path)
 
@@ -103,7 +103,11 @@ if __name__ == "__main__":
         default=-1,
         help="continue training from this version",
     )
-    parser.add_argument("--last", action="store_true", help="train from last in specified version")
+    parser.add_argument(
+        "--last",
+        action="store_true",
+        help="train from last in specified version",
+    )
     parser.add_argument("--batch_size", type=int, default=32, help="batch size")
     parser.add_argument(
         "--max_epochs", type=int, default=1000, help="max epochs"
@@ -119,18 +123,17 @@ if __name__ == "__main__":
     wandb.init(
         project="phase0 training",
         config={
-        "learning_rate": args.learning_rate,
-        "weight_decay": args.weight_decay,
-        "epochs": args.max_epochs,
-        "color_augment_prob": args.color_augment_prob,
-        "rotate_augment_prob": args.rotate_augment_prob,
-        "perspective_augment_prob": args.perspective_augment_prob,
-        "crop_augment_prob": args.crop_augment_prob,
-        "dropout_prob": args.dropout_prob,
-        }
+            "learning_rate": args.learning_rate,
+            "weight_decay": args.weight_decay,
+            "epochs": args.max_epochs,
+            "color_augment_prob": args.color_augment_prob,
+            "rotate_augment_prob": args.rotate_augment_prob,
+            "perspective_augment_prob": args.perspective_augment_prob,
+            "crop_augment_prob": args.crop_augment_prob,
+            "dropout_prob": args.dropout_prob,
+        },
     )
 
     main(args)
 
     wandb.finish()
-

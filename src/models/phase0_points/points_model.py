@@ -9,10 +9,10 @@ import torch.nn as nn
 from PIL import Image
 from torch import Tensor
 
+import wandb
 from src.datasets.phase0points_dataset import Phase0PointsDataset
 from src.models.phase0_points.backbone import Phase0PointsBackbone
 
-import wandb
 
 class CNNModulePhase0Points(pl.LightningModule):
     def __init__(self):
@@ -36,7 +36,9 @@ class CNNModulePhase0Points(pl.LightningModule):
         return x
 
     def configure_optimizers(self):
-        print(f"configure_optimizers. weight_decay: {self.weight_decay}, lr: {self.learning_rate}")
+        print(
+            f"configure_optimizers. weight_decay: {self.weight_decay}, lr: {self.learning_rate}"
+        )
         optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.learning_rate,
