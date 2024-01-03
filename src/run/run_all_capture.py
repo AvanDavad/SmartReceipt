@@ -3,19 +3,18 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-import torch
 from PIL import Image
-from PIL import ImageDraw
-from src.camera_calib import get_default_camera_calib
 
-from src.datasets.phase0points_dataset import Phase0PointsDataset
-from src.draw_utils import draw_borders, draw_borders_with_chars_and_probs, make_square_by_cropping, save_img_with_kps
+from src.camera_calib import get_default_camera_calib
+from src.draw_utils import draw_borders
+from src.draw_utils import draw_borders_with_chars_and_probs
+from src.draw_utils import make_square_by_cropping
+from src.draw_utils import save_img_with_kps
 from src.models.phase0_points.points_model import CNNModulePhase0Points
 from src.models.phase1line_model import CNNModulePhase1Line
 from src.models.phase2_single_char_model import CNNModulePhase2SingleChar
 from src.models.phase2char_border_model import CNNModulePhase2CharsBorder
 from src.path_utils import get_best_ckpt_path
-from src.visualization.font import get_font
 from src.warp_perspective import warp_perspective_with_nonlin_least_squares
 
 PROJ_DIR = Path(__file__).parents[2]
@@ -58,7 +57,11 @@ def main(args):
 
     # warping
     camera_matrix, dist_coeffs = get_default_camera_calib(input_img.size)
-    ortho_img, points_on_ortho, tr_matrix = warp_perspective_with_nonlin_least_squares(
+    (
+        ortho_img,
+        points_on_ortho,
+        tr_matrix,
+    ) = warp_perspective_with_nonlin_least_squares(
         input_img, pred_kps, camera_matrix, dist_coeffs
     )
 
@@ -70,8 +73,9 @@ def main(args):
         PROJ_DIR / "model_checkpoints" / "CNNModulePhase1Line"
     )
     line_model = CNNModulePhase1Line().load_from_checkpoint(ckpt_path)
-    line_image_list = line_model.inference(ortho_img, out_folder, prefix="2_lines")
-
+    line_image_list = line_model.inference(
+        ortho_img, out_folder, prefix="2_lines"
+    )
 
     # reading lines
 
