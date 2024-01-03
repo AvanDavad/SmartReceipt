@@ -18,10 +18,10 @@ from src.visualization.font import get_font
 
 
 class CNNModulePhase0Points(pl.LightningModule):
-    def __init__(self):
+    def __init__(self, use_bn: bool = True):
         super().__init__()
 
-        self.backbone = Phase0PointsBackbone()
+        self.backbone = Phase0PointsBackbone(use_bn)
         self.flatten = nn.Flatten()
 
         self.fc = nn.Linear(32, 8)
