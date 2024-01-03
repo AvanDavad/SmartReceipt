@@ -8,23 +8,12 @@ from PIL import Image
 from PIL import ImageDraw
 
 from src.datasets.phase0points_dataset import Phase0PointsDataset
+from src.draw_utils import make_square_by_cropping
 from src.models.phase0_points.points_model import CNNModulePhase0Points
 from src.path_utils import get_best_ckpt_path
 from src.visualization.font import get_font
 
 PROJ_DIR = Path(__file__).parents[2]
-
-
-def make_square_by_cropping(img: Image.Image) -> Image.Image:
-    w, h = img.size
-    if w == h:
-        return img
-    elif w > h:
-        margin = (w - h) // 2
-        return img.crop((margin, 0, w - margin, h))
-    else:
-        margin = (h - w) // 2
-        return img.crop((0, margin, w, h - margin))
 
 
 def main(args):

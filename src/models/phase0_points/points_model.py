@@ -7,11 +7,14 @@ import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 from PIL import Image
+from PIL import ImageDraw
 from torch import Tensor
 
 import wandb
 from src.datasets.phase0points_dataset import Phase0PointsDataset
+from src.draw_utils import make_square_by_cropping
 from src.models.phase0_points.backbone import Phase0PointsBackbone
+from src.visualization.font import get_font
 
 
 class CNNModulePhase0Points(pl.LightningModule):
@@ -93,6 +96,8 @@ class CNNModulePhase0Points(pl.LightningModule):
         as_int: bool = False,
         to_tuple_list: bool = False,
     ) -> Union[np.ndarray, List[Tuple]]:
+        assert img.width == img.height
+
         img_tensor: Tensor = Phase0PointsDataset.TRANSFORMS(img)
         img_tensor = img_tensor.unsqueeze(0)
 
@@ -112,3 +117,53 @@ class CNNModulePhase0Points(pl.LightningModule):
             return pred_kps_tup
 
         return pred_kps_np
+
+    def inference_and_visualize(
+        self,
+        img: Image.Image,
+        circle_radius: int = 5,
+        circle_color: str = "blue",
+        draw_index: bool = False,
+        font_size: int = 25,
+        font_color: str = "black",
+        draw_lines: bool = True,
+        line_width: int = 2,
+        line_color: str = "blue",
+    ) -> Image.Image:
+        if not img.width == img.height:
+            img = make_square_by_cropping(img)
+
+        pred_kps = self.inference(img, as_int=True, to_tuple_list=True)
+
+        draw = ImageDraw.Draw(img)
+
+        for idx, kpt in enumerate(pred_kps):
+            draw.ellipse(
+                (
+                    kpt[0] - circle_radius,
+                    kpt[1] - circle_radius,
+                    kpt[0] + circle_radius,
+                    kpt[1] + circle_radius,
+                ),
+                fill=circle_color,
+            )
+
+            if draw_index:
+                draw.text(
+                    kpt, str(idx + 1), fill=font_color, font=get_font(font_size)
+                )
+
+        if draw_lines:
+            for i0, i1 in [
+                (0, 1),
+                (0, 2),
+                (1, 3),
+                (2, 3),
+            ]:
+                start_point = pred_kps[i0]
+                end_point = pred_kps[i1]
+                draw.line(
+                    (start_point, end_point), fill=line_color, width=line_width
+                )
+
+        return img

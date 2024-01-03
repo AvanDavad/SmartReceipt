@@ -1,9 +1,3 @@
-"""
-python -m src.run.run_inference_phase0point_model \
-    --version_num 0 \
-    --ckpt_name resnet-epoch=00-val_loss=0.00000
-
-"""
 import argparse
 from pathlib import Path
 

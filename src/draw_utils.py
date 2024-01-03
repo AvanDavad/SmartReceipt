@@ -305,3 +305,15 @@ def draw_for_char_recognition(
             font=ImageFont.truetype("arial.ttf", 80),
         )
     return img
+
+
+def make_square_by_cropping(img: Image.Image) -> Image.Image:
+    w, h = img.size
+    if w == h:
+        return img
+    elif w > h:
+        margin = (w - h) // 2
+        return img.crop((margin, 0, w - margin, h))
+    else:
+        margin = (h - w) // 2
+        return img.crop((0, margin, w, h - margin))
