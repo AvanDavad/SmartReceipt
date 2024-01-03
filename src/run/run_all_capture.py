@@ -8,8 +8,8 @@ from PIL import Image
 from PIL import ImageDraw
 
 from src.datasets.phase0points_dataset import Phase0PointsDataset
-from src.models.phase0points_model import CNNModulePhase0Points
-from src.run.run_all import get_best_ckpt_path
+from src.models.phase0_points.points_model import CNNModulePhase0Points
+from src.path_utils import get_best_ckpt_path
 from src.visualization.font import get_font
 
 PROJ_DIR = Path(__file__).parents[2]

@@ -5,7 +5,7 @@ from PIL import Image
 
 from src.draw_utils import draw_borders
 from src.models.phase2char_border_model import CNNModulePhase2CharsBorder
-from src.run.run_all import get_best_ckpt_path
+from src.path_utils import get_best_ckpt_path
 
 PROJ_DIR = Path(__file__).parent.parent.parent
 

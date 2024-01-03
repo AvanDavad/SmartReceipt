@@ -7,7 +7,9 @@ python -m src.run.run_inference_phase0point_model \
 import argparse
 from pathlib import Path
 
-from src.models.phase0points_model import CNNModulePhase0Points
+from PIL import Image
+
+from src.models.phase0_points.points_model import CNNModulePhase0Points
 
 PROJ_DIR = Path(__file__).parent.parent.parent
 LIGHTNING_LOGS = (
@@ -22,31 +24,33 @@ def main(args):
         / "checkpoints"
         / f"{args.ckpt_name}.ckpt"
     )
-    model = CNNModulePhase0Points().load_from_checkpoint(ckpt_path)
+    CNNModulePhase0Points().load_from_checkpoint(ckpt_path)
 
     # inference
-    img_path_test = PROJ_DIR / "data" / "test"
-    img_path_train = PROJ_DIR / "data" / "train"
+    PROJ_DIR / "data" / "test"
+    PROJ_DIR / "data" / "train"
     out_folder_test = (
         PROJ_DIR / "inference" / f"version_{args.version_num}" / "test"
     )
     out_folder_train = (
         PROJ_DIR / "inference" / f"version_{args.version_num}" / "train"
     )
-    out_folder_test.mkdir(exist_ok=True, parents=True)
-    out_folder_train.mkdir(exist_ok=True, parents=True)
 
-    for img_filename in img_path_test.glob("*.jpg"):
-        model.inference(
-            img_filename,
-            out_folder=out_folder_test,
-        )
 
-    for img_filename in img_path_train.glob("*.jpg"):
-        model.inference(
-            img_filename,
-            out_folder=out_folder_train,
-        )
+out_folder_test.mkdir(exist_ok=True, parents=True)
+out_folder_train.mkdir(exist_ok=True, parents=True)
+
+for img_filename in img_path_test.glob("*.jpg"):
+    model.inference(
+        img_filename,
+        out_folder=out_folder_test,
+    )
+
+for img_filename in img_path_train.glob("*.jpg"):
+    model.inference(
+        Image.open(img_filename),
+        out_folder=out_folder_train,
+    )
 
 
 if __name__ == "__main__":

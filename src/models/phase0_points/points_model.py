@@ -12,6 +12,7 @@ from torch import Tensor
 from src.datasets.phase0points_dataset import Phase0PointsDataset
 from src.models.phase0_points.backbone import Phase0PointsBackbone
 
+import wandb
 
 class CNNModulePhase0Points(pl.LightningModule):
     def __init__(self):
@@ -35,12 +36,16 @@ class CNNModulePhase0Points(pl.LightningModule):
         return x
 
     def configure_optimizers(self):
+        print(f"configure_optimizers. weight_decay: {self.weight_decay}, lr: {self.learning_rate}")
         optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.learning_rate,
             weight_decay=self.weight_decay,
         )
         return optimizer
+
+    def configure_dropout_prob(self, dropout_prob: float):
+        self.backbone.dropout = nn.Dropout(p=dropout_prob)
 
     def _loss(self, kps_gt, kps_pred):
         loss = (
@@ -65,12 +70,20 @@ class CNNModulePhase0Points(pl.LightningModule):
 
         return loss
 
+    def on_train_epoch_end(self):
+        train_loss = self.trainer.callback_metrics["train_loss"]
+        wandb.log({"train_loss": train_loss.item()})
+
     def validation_step(self, batch, batch_idx):
         _, loss = self._pred_with_loss(batch)
 
         self.log("val_loss", loss, prog_bar=True)
 
         return loss
+
+    def on_validation_epoch_end(self):
+        val_loss = self.trainer.callback_metrics["val_loss"]
+        wandb.log({"val_loss": val_loss.item()})
 
     def inference(
         self,
