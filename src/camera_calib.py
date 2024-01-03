@@ -19,6 +19,7 @@ def get_camera_calib(
 
     return camera_matrix, dist_coeffs
 
+
 def get_default_camera_calib(img_size_wh: Tuple[int, int]):
     w, h = img_size_wh
     fx = 1.2 * w
