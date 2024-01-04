@@ -19,3 +19,10 @@ To infere the model (from input image):
 ```bash
 python -m src.models.phase0_points.run_inference_img -i image.jpg
 ```
+
+To infere the model (from input video):
+
+```bash
+python -m src.models.phase0_points.run_inference_video -i vid.mp4
+```
+
