@@ -1,2 +1,2 @@
-![Demo of phase0](https://s13.gifyu.com/images/SjBba.gif)
+![Demo of phase0](visuals/receipt_phase0.gif)
 
