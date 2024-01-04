@@ -18,7 +18,7 @@ from src.visualization.font import get_font
 
 
 class CNNModulePhase0Points(pl.LightningModule):
-    def __init__(self, use_bn: bool = True):
+    def __init__(self, use_bn: bool = False):
         super().__init__()
 
         self.backbone = Phase0PointsBackbone(use_bn)
