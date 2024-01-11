@@ -1,13 +1,13 @@
 import argparse
 from pathlib import Path
 
-from PIL import Image
-from src.draw_utils import make_square_by_cropping
-
-from src.models.phase0_points.points_model import CNNModulePhase0Points
-from src.path_utils import get_best_ckpt_path
 import cv2
 import numpy as np
+from PIL import Image
+
+from src.draw_utils import make_square_by_cropping
+from src.models.phase0_points.points_model import CNNModulePhase0Points
+from src.path_utils import get_best_ckpt_path
 
 PROJ_DIR = Path(__file__).parents[3]
 MODEL_CHECKPOINTS = PROJ_DIR / "model_checkpoints" / "CNNModulePhase0Points"
@@ -46,7 +46,9 @@ def main(args):
 
     fourcc = cv2.VideoWriter_fourcc(*"avc1")
     filename = "output_video.mp4"
-    out = cv2.VideoWriter(filename, fourcc, fps, (out_images[0].size[0], out_images[0].size[1]))
+    out = cv2.VideoWriter(
+        filename, fourcc, fps, (out_images[0].size[0], out_images[0].size[1])
+    )
 
     for img in out_images:
         out.write(np.array(img)[..., ::-1])
@@ -54,6 +56,7 @@ def main(args):
     out.release()
 
     print(f"saved to {filename}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -75,7 +78,11 @@ if __name__ == "__main__":
         action="store_true",
         help="use last version in specified version instead of best",
     )
-    parser.add_argument("--rotate_left", action="store_true", help="rotate the video left 90 degrees")
+    parser.add_argument(
+        "--rotate_left",
+        action="store_true",
+        help="rotate the video left 90 degrees",
+    )
 
     args = parser.parse_args()
     main(args)

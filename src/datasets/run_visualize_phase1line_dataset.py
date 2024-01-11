@@ -9,6 +9,7 @@ from src.readers.image_reader import ImageReader
 
 PROJ_DIR = Path(__file__).parents[2]
 
+
 def main(args):
     rootdir = Path(args.rootdir) / args.split
     assert rootdir.is_dir(), rootdir
@@ -36,16 +37,17 @@ def main(args):
             print(f"saved to {filename}")
             i += 1
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--rootdir", type=str, default=PROJ_DIR / "data")
     parser.add_argument("--split", type=str, default="train")
     parser.add_argument("--augment", action="store_true")
     parser.add_argument("--repeat", type=int, default=3)
-    parser.add_argument("--max_num", type=int, default=50, help="max number of saved images")
     parser.add_argument(
-        "--out_folder", type=str, default="visualization"
+        "--max_num", type=int, default=50, help="max number of saved images"
     )
+    parser.add_argument("--out_folder", type=str, default="visualization")
     args = parser.parse_args()
 
     main(args)

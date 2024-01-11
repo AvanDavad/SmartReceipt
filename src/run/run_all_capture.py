@@ -11,7 +11,7 @@ from src.draw_utils import draw_borders_with_chars_and_probs
 from src.draw_utils import make_square_by_cropping
 from src.draw_utils import save_img_with_kps
 from src.models.phase0_points.points_model import CNNModulePhase0Points
-from src.models.phase1line_model import CNNModulePhase1Line
+from src.models.phase1_lines.line_model import CNNModulePhase1Line
 from src.models.phase2_single_char_model import CNNModulePhase2SingleChar
 from src.models.phase2char_border_model import CNNModulePhase2CharsBorder
 from src.path_utils import get_best_ckpt_path

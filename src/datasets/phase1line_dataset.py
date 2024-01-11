@@ -1,4 +1,5 @@
-from typing import List, Tuple
+from typing import List
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -22,7 +23,12 @@ class Phase1LineDataset(Dataset):
         ]
     )
 
-    def __init__(self, image_reader: ImageReader, augment: bool=False, shuffle: bool=False):
+    def __init__(
+        self,
+        image_reader: ImageReader,
+        augment: bool = False,
+        shuffle: bool = False,
+    ):
         self.image_reader = image_reader
         self.augment = augment
 
@@ -51,7 +57,11 @@ class Phase1LineDataset(Dataset):
         lines = sample.phase_1_lines
 
         y_offset_min = (
-            (lines[line_idx] if line_idx==0 else (lines[line_idx - 1] + lines[line_idx] * 2) // 3)
+            (
+                lines[line_idx]
+                if line_idx == 0
+                else (lines[line_idx - 1] + lines[line_idx] * 2) // 3
+            )
             if self.augment
             else lines[line_idx]
         )
@@ -64,17 +74,37 @@ class Phase1LineDataset(Dataset):
 
         quarter_size = img.width // 4
         img_0 = img.crop((0, y_offset, quarter_size, y_offset + quarter_size))
-        img_1 = img.crop((quarter_size, y_offset, quarter_size * 2, y_offset + quarter_size))
-        img_2 = img.crop((quarter_size * 2, y_offset, quarter_size * 3, y_offset + quarter_size))
-        img_3 = img.crop((quarter_size * 3, y_offset, quarter_size * 4, y_offset + quarter_size))
+        img_1 = img.crop(
+            (quarter_size, y_offset, quarter_size * 2, y_offset + quarter_size)
+        )
+        img_2 = img.crop(
+            (
+                quarter_size * 2,
+                y_offset,
+                quarter_size * 3,
+                y_offset + quarter_size,
+            )
+        )
+        img_3 = img.crop(
+            (
+                quarter_size * 3,
+                y_offset,
+                quarter_size * 4,
+                y_offset + quarter_size,
+            )
+        )
 
         img_0_tensor = Phase1LineDataset.TRANSFORMS(img_0)
         img_1_tensor = Phase1LineDataset.TRANSFORMS(img_1)
         img_2_tensor = Phase1LineDataset.TRANSFORMS(img_2)
         img_3_tensor = Phase1LineDataset.TRANSFORMS(img_3)
 
-        input_tensor = torch.cat([img_0_tensor, img_1_tensor, img_2_tensor, img_3_tensor], dim=0)
-        line_y = torch.tensor([(lines[line_idx + 1] - y_offset) / quarter_size]).float()
+        input_tensor = torch.cat(
+            [img_0_tensor, img_1_tensor, img_2_tensor, img_3_tensor], dim=0
+        )
+        line_y = torch.tensor(
+            [(lines[line_idx + 1] - y_offset) / quarter_size]
+        ).float()
 
         sample_t = {
             "input": input_tensor,
@@ -87,7 +117,7 @@ class Phase1LineDataset(Dataset):
     def images_from_tensor(input_tensor: torch.Tensor) -> List[Image.Image]:
         images = []
         for i in range(input_tensor.shape[0] // 3):
-            img = input_tensor[3*i:3*(i+1)].permute(1, 2, 0).numpy()
+            img = input_tensor[3 * i : 3 * (i + 1)].permute(1, 2, 0).numpy()
             img = (
                 img * np.array(Phase1LineDataset.STD)
                 + np.array(Phase1LineDataset.MEAN)
@@ -116,11 +146,15 @@ class Phase1LineDataset(Dataset):
         composite_img = Image.new(
             "RGB",
             (
-                images_with_lines[0].width * len(images_with_lines) + margin * (len(images_with_lines) + 1),
+                images_with_lines[0].width * len(images_with_lines)
+                + margin * (len(images_with_lines) + 1),
                 images_with_lines[0].height + margin * 2,
             ),
         )
         for i, img_with_line in enumerate(images_with_lines):
-            composite_img.paste(img_with_line, (margin + (img_with_line.width + margin) * i, margin))
+            composite_img.paste(
+                img_with_line,
+                (margin + (img_with_line.width + margin) * i, margin),
+            )
 
         return composite_img

@@ -39,9 +39,6 @@ class CNNModulePhase0Points(pl.LightningModule):
         return x
 
     def configure_optimizers(self):
-        print(
-            f"configure_optimizers. weight_decay: {self.weight_decay}, lr: {self.learning_rate}"
-        )
         optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.learning_rate,

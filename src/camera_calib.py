@@ -22,8 +22,7 @@ def get_camera_calib(
 
 def get_default_camera_calib(img_size_wh: Tuple[int, int]):
     w, h = img_size_wh
-    fx = 1.2 * w
-    fy = 1.2 * h
+    fx = fy = 1.2 * w
     cx = w / 2
     cy = h / 2
     camera_matrix = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
